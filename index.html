@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#212121">
+<title>LARK — AI Assistant</title>
+<style>
+:root{--bg:#212121;--panel:#171717;--panel2:#2f2f2f;--hover:#2a2a2a;--text:#ececec;--muted:#a0a0a0;--line:#3a3a3a;--green:#10a37f;--user:#303030}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}button,textarea{font:inherit}button{cursor:pointer;color:inherit;border:0;background:transparent}button:focus-visible,textarea:focus-visible{outline:2px solid #777;outline-offset:2px}
+.app{height:100dvh;display:flex;overflow:hidden}.sidebar{width:260px;flex-shrink:0;background:var(--panel);display:flex;flex-direction:column;padding:10px 10px 12px;transition:width .2s,transform .2s;z-index:5}.side-top{display:flex;align-items:center;justify-content:space-between;padding:3px 3px 18px}.brand{font-size:18px;font-weight:650;letter-spacing:-.6px;display:flex;align-items:center;gap:9px}.brand-mark{width:27px;height:27px;border:1.5px solid #ececec;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:500}.icon-btn{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:#d6d6d6}.icon-btn:hover,.nav-btn:hover,.history-item:hover{background:var(--hover)}svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.nav{display:flex;flex-direction:column;gap:3px}.nav-btn{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 11px;border-radius:9px;font-size:14px}.nav-btn svg{width:19px;height:19px}.nav-btn.active{background:#2f2f2f}.side-section{margin-top:25px;min-height:0;display:flex;flex-direction:column;flex:1}.section-label{font-size:12px;font-weight:600;color:#b4b4b4;padding:0 11px 9px}.history{overflow:auto;display:flex;flex-direction:column;gap:2px}.history-item{border-radius:8px;padding:9px 11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;color:#d9d9d9;font-size:13px}.side-bottom{border-top:1px solid #303030;padding-top:10px}.profile{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px}.profile:hover{background:var(--hover)}.avatar{width:31px;height:31px;border-radius:50%;background:#7a5d45;display:grid;place-items:center;font-weight:650;color:white}.profile-info{min-width:0;flex:1}.profile-name{font-size:13px;font-weight:600}.profile-plan{font-size:11px;color:var(--muted);margin-top:2px}
+.main{min-width:0;flex:1;display:flex;flex-direction:column;position:relative}.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}.top-left,.top-right{display:flex;align-items:center;gap:8px}.mobile-menu{display:none}.model-select{font-size:18px;font-weight:600;letter-spacing:-.45px;padding:7px 9px;border-radius:9px;display:flex;align-items:center;gap:7px}.model-select:hover{background:var(--hover)}.model-select .subtle{font-size:15px;color:#9b9b9b;font-weight:400}.upgrade{display:flex;align-items:center;gap:7px;background:#f9f9f9;color:#222;border-radius:999px;padding:8px 13px;font-weight:600;font-size:12px}.upgrade:hover{background:#e3e3e3}.share-btn{display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;background:#303030;font-size:12px}.share-btn:hover{background:#404040}
+.chat-scroll{flex:1;overflow-y:auto;scroll-behavior:smooth}.welcome{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px 14vh}.welcome h1{font-size:30px;font-weight:600;letter-spacing:-.8px;margin:0 0 28px;text-align:center}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(100%,620px)}.suggestion{border:1px solid #414141;border-radius:14px;padding:14px 15px;text-align:left;min-height:68px;display:flex;flex-direction:column;gap:5px}.suggestion:hover{background:#2a2a2a}.suggestion strong{font-size:14px;font-weight:550}.suggestion span{font-size:12px;color:#a5a5a5}
+.messages{width:100%;max-width:800px;margin:0 auto;padding:22px 24px 30px;display:flex;flex-direction:column;gap:26px}.message{display:flex;gap:15px;align-items:flex-start;line-height:1.65;font-size:15px}.message.user{justify-content:flex-end}.message .bubble{max-width:calc(100% - 45px);overflow-wrap:anywhere}.message.user .bubble{background:var(--user);padding:10px 16px;border-radius:22px;max-width:78%}.message .avatar-mini{width:30px;height:30px;flex-shrink:0;border-radius:50%;display:grid;place-items:center}.assistant-mark{background:var(--green);color:#fff;font-size:17px;font-weight:600}.user-mark{background:#5c6c82;color:#fff;font-size:12px}.message-text p{margin:0 0 12px}.message-text p:last-child{margin-bottom:0}.message-actions{display:flex;gap:4px;margin-top:9px;opacity:.85}.message-actions button{width:30px;height:30px;border-radius:7px;color:#aaa;display:grid;place-items:center}.message-actions button:hover{background:#383838;color:white}.message-actions svg{width:16px;height:16px}.typing{display:flex;gap:5px;padding:10px 0}.typing i{width:6px;height:6px;border-radius:50%;background:#aaa;animation:pulse 1s infinite ease-in-out}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes pulse{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.composer-area{padding:10px 20px 12px;flex-shrink:0}.composer-wrap{max-width:800px;margin:0 auto}.composer{background:#303030;border:1px solid #3b3b3b;border-radius:28px;padding:12px 13px 9px;box-shadow:0 2px 10px #00000012}.composer textarea{display:block;width:100%;resize:none;max-height:200px;min-height:28px;background:transparent;color:var(--text);border:0;outline:0;padding:3px 7px 8px;font-size:15px;line-height:1.5}.composer textarea::placeholder{color:#a3a3a3}.composer-tools{display:flex;align-items:center;justify-content:space-between;gap:8px}.tools-left,.tools-right{display:flex;align-items:center;gap:5px}.tool-btn{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;height:34px;min-width:34px;padding:0 9px;color:#d0d0d0}.tool-btn:hover{background:#414141}.tool-btn.label{font-size:12px;border:1px solid #555;height:31px}.tool-btn svg{width:19px;height:19px}.send-btn{background:#f5f5f5;color:#171717;border-radius:50%;width:34px;height:34px;display:grid;place-items:center}.send-btn:hover{background:#d7d7d7}.send-btn:disabled{background:#666;color:#303030;cursor:default}.send-btn svg{width:18px;height:18px;stroke-width:2.4}.disclaimer{text-align:center;color:#9b9b9b;font-size:11px;padding-top:9px}.disclaimer a{color:inherit;text-decoration:underline;text-underline-offset:2px}.model-menu{position:absolute;top:50px;left:18px;width:320px;background:#2c2c2c;border:1px solid #414141;border-radius:14px;box-shadow:0 10px 40px #0008;padding:8px;z-index:10;display:none}.model-menu.open{display:block}.menu-heading{padding:8px 10px;color:#a8a8a8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}.model-option{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:11px 10px;border-radius:9px}.model-option:hover,.model-option.selected{background:#414141}.model-option .model-copy{flex:1}.model-option strong{display:block;font-size:13px;font-weight:600}.model-option small{display:block;color:#aaa;font-size:11px;margin-top:3px}.check{color:#ddd}.toast{position:absolute;bottom:105px;left:50%;transform:translateX(-50%);background:#f4f4f4;color:#222;padding:9px 14px;border-radius:10px;font-size:12px;box-shadow:0 5px 20px #0005;display:none;z-index:20}.toast.show{display:block}.overlay{display:none}
+@media(max-width:760px){.sidebar{position:absolute;inset:0 auto 0 0;width:270px;transform:translateX(-100%);box-shadow:8px 0 30px #0005}.sidebar.open{transform:translateX(0)}.overlay.show{display:block;position:absolute;inset:0;background:#0008;z-index:4}.mobile-menu{display:grid}.topbar{padding:0 10px;height:54px}.model-select{font-size:17px;padding:7px 5px}.upgrade{display:none}.share-btn{padding:8px}.share-btn span{display:none}.welcome{padding:22px 18px 10vh}.welcome h1{font-size:26px}.suggestions{grid-template-columns:1fr}.suggestion{min-height:60px}.composer-area{padding:8px 10px max(10px,env(safe-area-inset-bottom))}.messages{padding:18px 15px 25px;gap:23px}.message{gap:10px;font-size:15px}.message .bubble{max-width:calc(100% - 40px)}.message.user .bubble{max-width:88%}.composer{padding:10px 10px 8px}.tool-btn.label{font-size:11px}.disclaimer{font-size:10px}.model-menu{left:10px;top:48px;width:min(320px,calc(100vw - 20px))}}
+@media(min-width:761px){.sidebar.collapsed{width:0;padding-left:0;padding-right:0;overflow:hidden}.sidebar.collapsed *{visibility:hidden}}
+
+.brand{gap:9px}.brand-mark{background:#e9e9e9;color:#171717;border:0;font-size:18px}.desktop-menu-toggle{display:grid}
+.chat-options-menu{position:absolute;right:16px;top:52px;width:230px;padding:7px;background:#2b2b2b;border:1px solid #444;border-radius:13px;box-shadow:0 12px 35px #0008;z-index:30;display:none}.chat-options-menu.open{display:block}.chat-options-menu button{width:100%;display:flex;align-items:center;gap:11px;text-align:left;padding:10px 11px;border-radius:8px;color:#e8e8e8;font-size:13px}.chat-options-menu button:hover{background:#414141}.chat-options-menu button span{flex:1}.chat-options-menu .danger{color:#ff8585}.menu-divider{height:1px;background:#444;margin:5px 7px}.message.search-hit{outline:2px solid #a78bfa;outline-offset:5px;border-radius:5px}.history-item.pinned:before{content:'⌖ ';color:#ddd}.history-item.archived{opacity:.55;text-decoration:line-through}.lock-banner{max-width:800px;margin:0 auto 8px;padding:9px 13px;border-radius:10px;background:#3b3030;color:#ffcece;font-size:12px;display:none}.lock-banner.show{display:block}
+@media(max-width:760px){.desktop-menu-toggle{display:none}.chat-options-menu{right:9px;top:48px}.top-right{gap:2px}}
+
+</style>
+ <script src="https://js.puter.com/v2/"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+<style>
+.message-text{min-width:0;line-height:1.75;overflow-wrap:anywhere}.message-text>*:first-child{margin-top:0}.message-text>*:last-child{margin-bottom:0}.message-text h1,.message-text h2,.message-text h3,.message-text h4{line-height:1.3;margin:1.15em 0 .55em;font-weight:650;letter-spacing:-.3px}.message-text h1{font-size:1.45em}.message-text h2{font-size:1.25em}.message-text h3{font-size:1.1em}.message-text p{margin:.65em 0}.message-text ul,.message-text ol{padding-left:1.6em;margin:.55em 0}.message-text li{padding-left:.2em;margin:.22em 0}.message-text li>ul,.message-text li>ol{margin:.2em 0}.message-text blockquote{margin:.8em 0;padding:.15em 0 .15em 1em;border-left:3px solid #666;color:#c9c9c9}.message-text a{color:#8ab4f8;text-decoration:underline;text-underline-offset:2px}.message-text table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:1em 0;font-size:.92em}.message-text th,.message-text td{border:1px solid #505050;padding:8px 10px;text-align:left;white-space:normal}.message-text th{background:#343434;font-weight:650}.message-text pre{position:relative;background:#151515;border:1px solid #393939;border-radius:10px;padding:14px;overflow:auto;max-width:100%;margin:.8em 0}.message-text pre code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.88em;line-height:1.55;white-space:pre}.message-text :not(pre)>code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#3a3a3a;border-radius:5px;padding:.12em .35em;font-size:.9em}.message-text hr{border:0;border-top:1px solid #454545;margin:1.2em 0}.message-text img{max-width:100%;height:auto;border-radius:8px}.message-text .katex-display{overflow-x:auto;overflow-y:hidden;padding:.3em 0}.code-wrap{position:relative}.code-copy{position:absolute;right:8px;top:8px;background:#333;border:1px solid #555;border-radius:6px;padding:5px 8px;font-size:11px;color:#eee;z-index:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-top">
+      <div class="brand"><span class="brand-mark">✦</span><span>LARK</span></div>
+      <button class="icon-btn" id="collapseBtn" aria-label="Close sidebar" title="Close sidebar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" id="newChatBtn"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>New chat</button>
+      <button class="nav-btn" id="searchBtn"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Search chats</button>
+      <button class="nav-btn" id="libraryBtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Library</button>
+    </nav>
+    <div class="side-section"><div class="section-label">Your chats</div><div class="history" id="history"><button class="history-item">Welcome to your demo</button></div></div>
+    <div class="side-bottom"><div class="profile"><div class="avatar">S</div><div class="profile-info"><div class="profile-name">LARK</div><div class="profile-plan">Personal AI assistant</div></div><button class="icon-btn" id="profileMenu" aria-label="Profile menu"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div></div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left"><button class="icon-btn mobile-menu" id="mobileMenu" aria-label="Open menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><button class="model-select" id="modelBtn">Apex 3.1 <span class="subtle">▾</span></button></div>
+      <div class="top-right"><button class="icon-btn desktop-menu-toggle" id="sidebarToggle" aria-label="Toggle sidebar" title="Toggle sidebar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button><button class="icon-btn" id="chatMenuBtn" aria-label="Chat options" title="Chat options"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button></div>
+    </header>
+    <div class="model-menu" id="modelMenu">
+      <div class="menu-heading">Choose your LARK model · strongest to fastest</div>
+      <button class="model-option" data-model="Lark max"><span>✦</span><span class="model-copy"><strong>Lark max</strong><small>GPT-6 Astra · highest capability</small></span><span class="check">✓</span></button>
+      <button class="model-option" data-model="Dirt nobe"><span>◆</span><span class="model-copy"><strong>Dirt nobe</strong><small>GPT-6 Sol · advanced reasoning</small></span><span class="check"></span></button>
+      <button class="model-option" data-model="Apex 3.8"><span>◇</span><span class="model-copy"><strong>Apex 3.8</strong><small>Claude Sonnet 5.5 · balanced</small></span><span class="check"></span></button>
+      <button class="model-option" data-model="Apex 3.1"><span>✧</span><span class="model-copy"><strong>Apex 3.1</strong><small>Gemini 3.8 Flash · fast</small></span><span class="check"></span></button>
+    </div>
+    <div class="chat-options-menu" id="chatOptionsMenu" role="menu" aria-label="Chat options">
+      <button data-action="share">↗ <span>Share chat</span></button>
+      <button data-action="pin">⌖ <span>Pin chat</span></button>
+      <button data-action="lock">♙ <span>Lock chats</span></button>
+      <button data-action="files">＋ <span>Uploaded files</span></button>
+      <button data-action="find">⌕ <span>Find in chat</span></button>
+      <button data-action="home">⌂ <span>Add to home screen</span></button>
+      <div class="menu-divider"></div>
+      <button data-action="archive">▣ <span>Archive chat</span></button>
+      <button class="danger" data-action="delete">⌫ <span>Delete chat</span></button>
+    </div>
+    <div class="chat-scroll" id="chatScroll">
+      <section class="welcome" id="welcome">
+        <h1>What can LARK help with?</h1>
+        <div class="suggestions">
+          <button class="suggestion" data-prompt="Explain a difficult topic to me in simple terms"><strong>✦ Learn something</strong><span>Explain a difficult topic simply</span></button>
+          <button class="suggestion" data-prompt="Help me brainstorm creative ideas for a project"><strong>♧ Brainstorm</strong><span>Explore ideas and possibilities</span></button>
+          <button class="suggestion" data-prompt="Write a polished message for me"><strong>✎ Write anything</strong><span>Draft, rewrite, or improve text</span></button>
+          <button class="suggestion" data-prompt="Help me solve a problem step by step"><strong>⌘ Solve a problem</strong><span>Work through it step by step</span></button>
+        </div>
+      </section>
+      <section class="messages" id="messages" hidden></section>
+    </div>
+    <div class="composer-area">
+      <div class="composer-wrap"><input id="filePicker" type="file" multiple hidden><div class="lock-banner" id="lockBanner"></div>
+        <div class="composer">
+          <textarea id="prompt" rows="1" placeholder="Message LARK" aria-label="Message LARK"></textarea>
+          <div class="composer-tools">
+            <div class="tools-left">
+              <button class="tool-btn" id="attachBtn" title="Attach files (demo)"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+              <button class="tool-btn label" id="toolsBtn"><svg viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1"/><circle cx="12" cy="12" r="4"/></svg>Tools</button>
+            </div>
+            <div class="tools-right">
+              <button class="tool-btn" id="voiceBtn" title="Voice (demo)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-4 0h8"/></svg></button>
+              <button class="send-btn" id="sendBtn" aria-label="Send message" disabled><svg viewBox="0 0 24 24"><path d="M12 19V5m-7 7 7-7 7 7"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="disclaimer">LARK can make mistakes. Check important information.</div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+  </main>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const sidebar=$('#sidebar'),overlay=$('#overlay'),promptBox=$('#prompt'),sendBtn=$('#sendBtn'),welcome=$('#welcome'),messages=$('#messages'),scroll=$('#chatScroll'),history=$('#history'),toast=$('#toast');
+let chatCount=0, activeTitle='New chat', toastTimer, currentModel='Apex 3.1', chatLocked=false, currentHistoryItem=null, archivedChats=[];
+// Core chat state required by the send handler.
+let conversation = [];
+let requestInProgress = false;
+const MODEL_IDS = {
+  'Apex 3.1': 'google/gemini-3.8-flash',
+  'Apex 3.8': 'anthropic/claude-sonnet-5-5',
+  'Dirt nobe': 'openai/gpt-6-sol',
+  'Lark max': 'openai/gpt-6-astra'
+};
+function notify(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2300)}
+function fit(){promptBox.style.height='auto';promptBox.style.height=Math.min(promptBox.scrollHeight,200)+'px';sendBtn.disabled=!promptBox.value.trim()}
+promptBox.addEventListener('input',fit);
+promptBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
+function newChat(){if(requestInProgress){notify('Wait for the current response to finish first');return}chatCount++;activeTitle='New chat';conversation=[];chatLocked=false;promptBox.disabled=false;$('#lockBanner')?.classList.remove('show');currentHistoryItem=null;welcome.hidden=false;messages.hidden=true;messages.innerHTML='';promptBox.value='';fit();$('#modelMenu').classList.remove('open');$('#chatOptionsMenu').classList.remove('open');if(innerWidth<=760)closeMobile();promptBox.focus()}
+$('#newChatBtn').addEventListener('click',newChat);
+$('#collapseBtn').addEventListener('click',()=>{if(innerWidth<=760)closeMobile();else sidebar.classList.add('collapsed')});
+$('#mobileMenu').addEventListener('click',()=>{sidebar.classList.add('open');overlay.classList.add('show')});
+$('#sidebarToggle').addEventListener('click',()=>{if(innerWidth<=760){sidebar.classList.add('open');overlay.classList.add('show')}else sidebar.classList.toggle('collapsed')});
+function closeMobile(){sidebar.classList.remove('open');overlay.classList.remove('show')}
+overlay.addEventListener('click',closeMobile);
+$('#modelBtn').addEventListener('click',()=>$('#modelMenu').classList.toggle('open'));
+document.addEventListener('click',e=>{if(!e.target.closest('#modelBtn')&&!e.target.closest('#modelMenu'))$('#modelMenu').classList.remove('open')});
+function updateModelMenu(){
+  document.querySelectorAll('.model-option').forEach(b=>{
+    const selected=b.dataset.model===currentModel;
+    b.classList.toggle('selected',selected);
+    const check=b.querySelector('.check');
+    if(check) check.textContent=selected?'✓':'';
+    b.setAttribute('aria-pressed',String(selected));
+  });
+  $('#modelBtn').innerHTML=currentModel+' <span class="subtle">▾</span>';
+}
+document.querySelectorAll('.model-option').forEach(b=>b.addEventListener('click',()=>{
+  currentModel=b.dataset.model;
+  updateModelMenu();
+  $('#modelMenu').classList.remove('open');
+  const id=MODEL_IDS[currentModel];
+  notify('Selected '+currentModel+' · Puter.js routing active');
+}));
+document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{promptBox.value=b.dataset.prompt;fit();promptBox.focus()}));
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderAssistantMarkdown(raw){
+  const source=String(raw??'');
+  // KaTeX-friendly delimiters: keep math delimiters for auto-render.
+  let html;
+  try{
+    if(window.marked){
+      marked.setOptions({gfm:true,breaks:false});
+      html=marked.parse(source,{async:false});
+    }else{
+      html='<p>'+escapeHTML(source).replace(/\n/g,'<br>')+'</p>';
+    }
+    html=window.DOMPurify?DOMPurify.sanitize(html,{USE_PROFILES:{html:true}}):html;
+  }catch(e){html='<p>'+escapeHTML(source).replace(/\n/g,'<br>')+'</p>';}
+  const wrapper=document.createElement('div');
+  wrapper.innerHTML=html;
+  if(window.renderMathInElement){
+    try{renderMathInElement(wrapper,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}],throwOnError:false,strict:'ignore'});}catch(e){}
+  }
+  wrapper.querySelectorAll('a').forEach(a=>{a.target='_blank';a.rel='noopener noreferrer';});
+  wrapper.querySelectorAll('pre').forEach(pre=>{
+    const code=pre.querySelector('code');if(!code)return;
+    const btn=document.createElement('button');btn.className='code-copy';btn.type='button';btn.textContent='Copy code';
+    btn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(code.innerText);btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy code',1200)}catch{notify('Copy is unavailable in this browser')}});
+    pre.style.paddingTop='42px';pre.appendChild(btn);
+  });
+  return wrapper.innerHTML;
+}
+function addMessage(text,who){
+  const article=document.createElement('article');
+  article.className='message '+who;
+  if(who==='user'){
+    const bubble=document.createElement('div');
+    bubble.className='bubble';
+    bubble.textContent=text;
+    article.appendChild(bubble);
+  }else{
+    const mark=document.createElement('div');
+    mark.className='avatar-mini assistant-mark';
+    mark.textContent='✳';
+    const body=document.createElement('div');
+    body.className='bubble';
+    const textEl=document.createElement('div');
+    textEl.className='message-text';
+    // Render Markdown safely; fall back to readable plain text if libraries are offline.
+    textEl.innerHTML=renderAssistantMarkdown(text);
+    const actions=document.createElement('div');
+    actions.className='message-actions';
+    actions.innerHTML='<button title="Copy" class="copy" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg></button><button title="Good response" aria-label="Good response"><svg viewBox="0 0 24 24"><path d="M7 10v11H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Zm0 0 5-8a3 3 0 0 1 2 3l-1 5h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 2H7"/></svg></button><button title="Bad response" aria-label="Bad response"><svg viewBox="0 0 24 24"><path d="M7 14V3H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2Zm0 0 5 8a3 3 0 0 0 2-3l-1-5h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-2H7"/></svg></button>';
+    body.append(textEl,actions);
+    article.append(mark,body);
+    const copy=actions.querySelector('.copy');
+    copy.addEventListener('click',async()=>{
+      try { await navigator.clipboard.writeText(text); notify('Copied to clipboard'); }
+      catch { notify('Could not copy in this browser'); }
+    });
+  }
+  messages.appendChild(article);
+  return article;
+}
+function extractPuterText(response){
+  if(typeof response==='string') return response;
+  if(response?.message?.content != null){
+    const content=response.message.content;
+    if(typeof content==='string') return content;
+    if(Array.isArray(content)) return content.map(x=>x.text||'').join('\n');
+    return String(content);
+  }
+  if(response?.text != null) return String(response.text);
+  return JSON.stringify(response,null,2);
+}
+async function sendMessage(){
+  const text=promptBox.value.trim();
+  if(!text || requestInProgress || chatLocked) return;
+  if(!window.puter || !puter.ai || typeof puter.ai.chat!=='function'){
+    notify('Puter.js is not ready. Check your internet connection and reload.');
+    return;
+  }
+  welcome.hidden=true;
+  messages.hidden=false;
+  if(chatCount===0 || activeTitle==='New chat'){
+    activeTitle=text.length>30?text.slice(0,30)+'…':text;
+    const item=document.createElement('button');
+    item.className='history-item';
+    currentHistoryItem=item;
+    item.textContent=activeTitle;
+    item.title=activeTitle;
+    item.addEventListener('click',()=>notify('Chat history is kept only for this page session.')); 
+    history.prepend(item);
+    chatCount++;
+  }
+  addMessage(text,'user');
+  conversation.push({role:'user',content:text});
+  promptBox.value='';
+  fit();
+  scroll.scrollTop=scroll.scrollHeight;
+  const waiting=document.createElement('article');
+  waiting.className='message';
+  waiting.innerHTML='<div class="avatar-mini assistant-mark">✳</div><div class="typing"><i></i><i></i><i></i></div>';
+  messages.appendChild(waiting);
+  scroll.scrollTop=scroll.scrollHeight;
+  requestInProgress=true;
+  sendBtn.disabled=true;
+  promptBox.disabled=true;
+  try{
+    const model=MODEL_IDS[currentModel] || MODEL_IDS.LARK;
+    const response=await puter.ai.chat(conversation, {model});
+    const answer=extractPuterText(response).trim() || 'The model returned an empty response.';
+    conversation.push({role:'assistant',content:answer});
+    waiting.remove();
+    addMessage(answer,'assistant');
+  }catch(error){
+    waiting.remove();
+    const errorText='Sorry, the request to Puter.js failed.\n\n'+(error?.message||String(error))+'\n\nCheck your internet connection, model ID, and Puter.js permissions, then try again.';
+    addMessage(errorText,'assistant');
+    // Remove the failed user turn from model context so it can be retried cleanly.
+    conversation.pop();
+  }finally{
+    requestInProgress=false;
+    promptBox.disabled=false;
+    fit();
+    promptBox.focus();
+    scroll.scrollTop=scroll.scrollHeight;
+  }
+}
+sendBtn.addEventListener('click',sendMessage);
+$('#attachBtn').addEventListener('click',()=>$('#filePicker').click());
+$('#filePicker').addEventListener('change',e=>{const files=[...(e.target.files||[])];if(!files.length)return;const names=files.map(f=>f.name).join(', ');notify('Selected files: '+names);const note='[Files selected: '+names+']. If you need me to analyse them, attach support must be added to the model request.';conversation.push({role:'user',content:note});e.target.value='';});
+$('#toolsBtn').addEventListener('click',()=>notify('Tools are visual only in this demo'));
+$('#voiceBtn').addEventListener('click',()=>notify('Voice mode is not connected in this demo'));
+$('#chatMenuBtn').addEventListener('click',()=>$('#chatOptionsMenu').classList.toggle('open'));
+document.addEventListener('click',e=>{if(!e.target.closest('#chatMenuBtn')&&!e.target.closest('#chatOptionsMenu'))$('#chatOptionsMenu').classList.remove('open')});
+$('#chatOptionsMenu').addEventListener('click',async e=>{const btn=e.target.closest('button[data-action]');if(!btn)return;const action=btn.dataset.action;$('#chatOptionsMenu').classList.remove('open');
+ if(action==='share'){const payload={title:'LARK chat',text:messages.innerText||'Chat with LARK',url:location.href};try{if(navigator.share)await navigator.share(payload);else{await navigator.clipboard.writeText(payload.url);notify('Page link copied to clipboard')}}catch(err){if(err.name!=='AbortError')notify('Sharing is not available in this browser')}}
+ if(action==='pin'){if(!currentHistoryItem){notify('Send a message first to create a chat');return}currentHistoryItem.classList.toggle('pinned');btn.querySelector('span').textContent=currentHistoryItem.classList.contains('pinned')?'Unpin chat':'Pin chat';notify(currentHistoryItem.classList.contains('pinned')?'Chat pinned':'Chat unpinned')}
+ if(action==='lock'){chatLocked=!chatLocked;promptBox.disabled=chatLocked;sendBtn.disabled=chatLocked||!promptBox.value.trim();let banner=$('#lockBanner');if(!banner){banner=document.createElement('div');banner.id='lockBanner';banner.className='lock-banner';$('.composer-wrap').prepend(banner)}banner.textContent=chatLocked?'🔒 Chat locked. Choose “Lock chats” again to unlock and continue.':'Chat unlocked.';banner.classList.add('show');btn.querySelector('span').textContent=chatLocked?'Unlock chats':'Lock chats';notify(chatLocked?'Chat input locked':'Chat unlocked')}
+ if(action==='files'){document.querySelector('#filePicker').click()}
+ if(action==='find'){const q=prompt('Find text in this chat:');if(q){document.querySelectorAll('.message').forEach(m=>m.classList.remove('search-hit'));const hits=[...document.querySelectorAll('.message')].filter(m=>m.innerText.toLowerCase().includes(q.toLowerCase()));hits.forEach(m=>m.classList.add('search-hit'));if(hits[0])hits[0].scrollIntoView({behavior:'smooth',block:'center'});notify(hits.length?`Found ${hits.length} matching message(s)`:'No matches in this chat')}}
+ if(action==='home'){notify('To add LARK to your home screen, open the browser menu and choose “Add to Home screen” or “Install app”.')}
+ if(action==='archive'){if(!currentHistoryItem){notify('There is no active chat to archive');return}currentHistoryItem.classList.add('archived');currentHistoryItem.remove();archivedChats.push(activeTitle);notify('Chat archived in this session');newChat()}
+ if(action==='delete'){if(!confirm('Delete this chat from the current session?'))return; if(currentHistoryItem)currentHistoryItem.remove();conversation=[];messages.innerHTML='';messages.hidden=true;welcome.hidden=false;activeTitle='New chat';currentHistoryItem=null;notify('Chat deleted from this session')}
+});
+$('#searchBtn').addEventListener('click',()=>{const q=prompt('Search chat titles:');if(q){const found=[...history.children].filter(x=>x.textContent.toLowerCase().includes(q.toLowerCase()));notify(found.length?`Found ${found.length} chat(s)`:'No matching chats')}})
+$('#libraryBtn').addEventListener('click',()=>notify('LARK library is not connected yet'));
+$('#profileMenu').addEventListener('click',()=>notify('LARK profile settings are coming soon'));
+</script>
+</body>
+</html>
