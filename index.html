@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#212121">
+<title>LARK — AI Assistant</title>
+<style>
+:root{--bg:#212121;--panel:#171717;--panel2:#2f2f2f;--hover:#2a2a2a;--text:#ececec;--muted:#a0a0a0;--line:#3a3a3a;--green:#10a37f;--user:#303030}
+*{box-sizing:border-box}[hidden]{display:none!important}html,body{height:100%;margin:0}body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}button,textarea{font:inherit}button{cursor:pointer;color:inherit;border:0;background:transparent}button:focus-visible,textarea:focus-visible{outline:2px solid #777;outline-offset:2px}
+.app{height:100dvh;display:flex;overflow:hidden}.sidebar{width:260px;flex-shrink:0;background:var(--panel);display:flex;flex-direction:column;padding:10px 10px 12px;transition:width .2s,transform .2s;z-index:5}.side-top{display:flex;align-items:center;justify-content:space-between;padding:3px 3px 18px}.brand{font-size:18px;font-weight:650;letter-spacing:-.6px;display:flex;align-items:center;gap:9px}.brand-mark{width:27px;height:27px;border:1.5px solid #ececec;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:500}.icon-btn{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:#d6d6d6}.icon-btn:hover,.nav-btn:hover,.history-item:hover{background:var(--hover)}svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.nav{display:flex;flex-direction:column;gap:3px}.nav-btn{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 11px;border-radius:9px;font-size:14px}.nav-btn svg{width:19px;height:19px}.nav-btn.active{background:#2f2f2f}.side-section{margin-top:25px;min-height:0;display:flex;flex-direction:column;flex:1}.section-label{font-size:12px;font-weight:600;color:#b4b4b4;padding:0 11px 9px}.history{overflow:auto;display:flex;flex-direction:column;gap:2px}.history-item{border-radius:8px;padding:9px 11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;color:#d9d9d9;font-size:13px}.side-bottom{border-top:1px solid #303030;padding-top:10px}.profile{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px}.profile:hover{background:var(--hover)}.avatar{width:31px;height:31px;border-radius:50%;background:#7a5d45;display:grid;place-items:center;font-weight:650;color:white}.profile-info{min-width:0;flex:1}.profile-name{font-size:13px;font-weight:600}.profile-plan{font-size:11px;color:var(--muted);margin-top:2px}
+.main{min-width:0;flex:1;display:flex;flex-direction:column;position:relative}.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}.top-left,.top-right{display:flex;align-items:center;gap:8px}.mobile-menu{display:none}.model-select{font-size:18px;font-weight:600;letter-spacing:-.45px;padding:7px 9px;border-radius:9px;display:flex;align-items:center;gap:7px}.model-select:hover{background:var(--hover)}.model-select .subtle{font-size:15px;color:#9b9b9b;font-weight:400}.upgrade{display:flex;align-items:center;gap:7px;background:#f9f9f9;color:#222;border-radius:999px;padding:8px 13px;font-weight:600;font-size:12px}.upgrade:hover{background:#e3e3e3}.share-btn{display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;background:#303030;font-size:12px}.share-btn:hover{background:#404040}
+.chat-scroll{flex:1;overflow-y:auto;scroll-behavior:smooth}.welcome{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px 14vh}.welcome h1{font-size:30px;font-weight:600;letter-spacing:-.8px;margin:0 0 28px;text-align:center}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(100%,620px)}.suggestion{border:1px solid #414141;border-radius:14px;padding:14px 15px;text-align:left;min-height:68px;display:flex;flex-direction:column;gap:5px}.suggestion:hover{background:#2a2a2a}.suggestion strong{font-size:14px;font-weight:550}.suggestion span{font-size:12px;color:#a5a5a5}
+.messages{width:100%;max-width:800px;margin:0 auto;padding:22px 24px 30px;display:flex;flex-direction:column;gap:26px}.message{display:flex;gap:15px;align-items:flex-start;line-height:1.65;font-size:15px}.message.user{justify-content:flex-end}.message .bubble{max-width:calc(100% - 45px);overflow-wrap:anywhere}.message.user .bubble{background:var(--user);padding:10px 16px;border-radius:22px;max-width:78%}.message .avatar-mini{width:30px;height:30px;flex-shrink:0;border-radius:50%;display:grid;place-items:center}.assistant-mark{background:var(--green);color:#fff;font-size:17px;font-weight:600}.user-mark{background:#5c6c82;color:#fff;font-size:12px}.message-text p{margin:0 0 12px}.message-text p:last-child{margin-bottom:0}.message-actions{display:flex;gap:4px;margin-top:9px;opacity:.85}.message-actions button{width:30px;height:30px;border-radius:7px;color:#aaa;display:grid;place-items:center}.message-actions button:hover{background:#383838;color:white}.message-actions svg{width:16px;height:16px}.typing{display:flex;gap:5px;padding:10px 0}.typing i{width:6px;height:6px;border-radius:50%;background:#aaa;animation:pulse 1s infinite ease-in-out}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes pulse{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.composer-area{padding:10px 20px 12px;flex-shrink:0}.composer-wrap{max-width:800px;margin:0 auto}.composer{background:#303030;border:1px solid #3b3b3b;border-radius:28px;padding:12px 13px 9px;box-shadow:0 2px 10px #00000012}.composer textarea{display:block;width:100%;resize:none;max-height:200px;min-height:28px;background:transparent;color:var(--text);border:0;outline:0;padding:3px 7px 8px;font-size:15px;line-height:1.5}.composer textarea::placeholder{color:#a3a3a3}.composer-tools{display:flex;align-items:center;justify-content:space-between;gap:8px}.tools-left,.tools-right{display:flex;align-items:center;gap:5px}.tool-btn{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;height:34px;min-width:34px;padding:0 9px;color:#d0d0d0}.tool-btn:hover{background:#414141}.tool-btn.label{font-size:12px;border:1px solid #555;height:31px}.tools-menu{position:absolute;bottom:76px;left:18px;z-index:40;display:none;min-width:210px;padding:7px;background:#252525;border:1px solid #444;border-radius:14px;box-shadow:0 12px 35px #0008}.tools-menu.open{display:block}.tools-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:12px;border:0;border-radius:9px;background:transparent;color:#eee;text-align:left;font-size:13px}.tools-menu button:hover{background:#393939}.youtube-results{display:flex;flex-direction:column;gap:18px;margin-top:14px;width:100%;max-width:900px}.youtube-card{display:grid;grid-template-columns:minmax(220px, min(44%, 360px)) minmax(0,1fr);grid-template-rows:auto auto 1fr;column-gap:18px;overflow:hidden;border:0;border-bottom:1px solid #383838;border-radius:0;background:transparent;padding:0 0 18px;min-width:0}.youtube-thumb-wrap{position:relative;grid-column:1;grid-row:1 / span 3;align-self:start;aspect-ratio:16/9;background:#111;overflow:hidden;cursor:pointer;border-radius:13px}.youtube-thumb{width:100%;height:100%;object-fit:cover;display:block}.youtube-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#111d;color:#fff;border:1px solid #ffffff55;border-radius:999px;width:48px;height:34px;font-size:17px}.youtube-card-title{font-size:17px;line-height:1.4;font-weight:650;padding:2px 0 5px;color:#f3f3f3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.youtube-meta{font-size:12px;color:#aaa;padding:0 0 8px}.youtube-card-description{font-size:14px;line-height:1.55;color:#d0d0d0;margin:0 0 10px}.youtube-fit-label{display:inline-flex;align-items:center;align-self:start;width:max-content;max-width:100%;background:#123d28;color:#70e49a;border-radius:999px;padding:4px 9px;font-size:12px;margin:0 0 9px}.youtube-card-actions{display:flex;flex-wrap:wrap;gap:8px;padding:2px 0 0}.youtube-card-actions button{background:#373737;color:#f2f2f2;border:1px solid #4a4a4a;border-radius:8px;padding:7px 9px;font-size:11px;cursor:pointer}.youtube-card-actions button:hover{background:#494949}.youtube-player{grid-column:1 / -1;width:100%;aspect-ratio:16/9;border:0;display:block;background:#000;border-radius:12px;margin-bottom:10px}.youtube-search-status{color:#aaa;font-size:13px;margin:8px 0}.youtube-search-error{border:1px solid #754e4e;background:#2b2020;color:#f2c5c5;border-radius:12px;padding:12px;margin-top:10px;font-size:13px}
+.generated-video{display:block;width:min(100%,760px);max-height:72vh;border-radius:14px;margin-top:10px;background:#090909;border:1px solid #393939}.video-gen-preview{height:180px;border-radius:12px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 25% 25%,#6d5e9b55,transparent 45%),radial-gradient(ellipse at 75% 70%,#3a9b8b44,transparent 48%),linear-gradient(135deg,#292929,#202020 55%,#303030);border:1px solid #ffffff0b}.generated-image{display:block;max-width:min(100%,720px);max-height:70vh;object-fit:contain;border-radius:14px;margin-top:10px;border:1px solid #393939}.image-generation-status{color:#aaa;font-size:13px;padding:10px 0}.image-gen-card{width:min(100%,560px);padding:15px;border:1px solid #393939;border-radius:18px;background:linear-gradient(145deg,#262626,#1c1c1c);overflow:hidden;animation:genCardIn .45s cubic-bezier(.2,.8,.2,1) both}.image-gen-heading{display:flex;align-items:center;gap:12px;margin-bottom:14px}.image-gen-orb{width:40px;height:40px;flex:0 0 40px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#d8c7ff22,#6be7cf22);border:1px solid #ffffff19;position:relative}.image-gen-orb:before{content:'✳';font-size:22px;color:#d8d0ff;animation:genSpark 2.4s ease-in-out infinite}.image-gen-copy strong{display:block;font-size:14px;font-weight:600}.image-gen-copy span{display:block;color:#a6a6a6;font-size:12px;margin-top:3px}.image-gen-preview{height:180px;border-radius:12px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 25% 25%,#6d5e9b55,transparent 45%),radial-gradient(ellipse at 75% 70%,#3a9b8b44,transparent 48%),linear-gradient(135deg,#292929,#202020 55%,#303030);border:1px solid #ffffff0b}.image-gen-preview:before{content:'';position:absolute;inset:-30%;background:linear-gradient(110deg,transparent 35%,#ffffff0a 45%,#ffffff20 50%,#ffffff0a 55%,transparent 65%);transform:translateX(-65%);animation:genShimmer 2.2s ease-in-out infinite}.image-gen-preview:after{content:'';position:absolute;left:12%;right:12%;bottom:17px;height:3px;border-radius:9px;background:#ffffff12;overflow:hidden}.image-gen-progress{height:3px;width:36%;position:absolute;left:12%;bottom:17px;border-radius:9px;background:linear-gradient(90deg,#a7a0ff,#70e5cb);animation:genProgress 2s ease-in-out infinite alternate;box-shadow:0 0 14px #8e91ff55}.image-gen-caption{display:flex;align-items:center;gap:7px;color:#aaa;font-size:12px;margin-top:12px}.image-gen-dot{width:6px;height:6px;border-radius:50%;background:#8fdfc9;box-shadow:0 0 10px #8fdfc966;animation:pulse 1.2s infinite}.generated-image-frame{width:fit-content;max-width:100%;padding:8px;border:1px solid #ffffff16;border-radius:17px;background:#191919;animation:genReveal .6s cubic-bezier(.2,.8,.2,1) both}.generated-image-frame .generated-image{margin-top:0;animation:genImageIn .7s ease both}@keyframes genCardIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes genSpark{0%,100%{transform:rotate(0) scale(.9);filter:drop-shadow(0 0 0 #b9b0ff)}50%{transform:rotate(90deg) scale(1.12);filter:drop-shadow(0 0 7px #b9b0ff99)}}@keyframes genShimmer{to{transform:translateX(65%)}}@keyframes genProgress{from{transform:translateX(0);width:18%}to{transform:translateX(150%);width:42%}}@keyframes genReveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes genImageIn{from{opacity:0;filter:blur(8px);transform:scale(.985)}to{opacity:1;filter:blur(0);transform:scale(1)}}@media(prefers-reduced-motion:reduce){.image-gen-card,.image-gen-orb:before,.image-gen-preview:before,.image-gen-progress,.generated-image-frame,.generated-image-frame .generated-image{animation:none!important}}
+.image-lightbox{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:18px}.image-lightbox.open{display:flex}.image-lightbox-panel{width:min(100%,1000px);max-height:94dvh;display:flex;flex-direction:column;background:#1d1d1d;border:1px solid #454545;border-radius:20px;overflow:hidden;box-shadow:0 24px 90px #0009;animation:genReveal .22s ease both}.image-lightbox-toolbar{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #383838;flex-wrap:wrap}.image-lightbox-title{font-size:14px;font-weight:600;margin-right:auto}.image-action{display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #454545;border-radius:10px;background:#2a2a2a;color:#f3f3f3;padding:9px 12px;font-size:12px;cursor:pointer}.image-action:hover{background:#3a3a3a}.image-action.primary{background:#eee;color:#171717;border-color:#eee}.image-action:disabled{opacity:.55;cursor:wait}.image-lightbox-stage{padding:16px;overflow:auto;display:flex;justify-content:center;align-items:center;min-height:180px}.image-lightbox-stage img{display:block;max-width:100%;max-height:calc(94dvh - 125px);object-fit:contain;border-radius:8px}.image-lightbox-note{font-size:12px;color:#aaa;padding:0 16px 12px}.image-edit-dialog{position:fixed;inset:0;z-index:1002;background:#0009;display:none;align-items:center;justify-content:center;padding:18px}.image-edit-dialog.open{display:flex}.image-edit-box{width:min(100%,480px);background:#242424;border:1px solid #484848;border-radius:18px;padding:18px}.image-edit-box h3{margin:0 0 8px;font-size:17px}.image-edit-box p{margin:0 0 12px;color:#aaa;font-size:13px}.image-edit-box textarea{width:100%;min-height:100px;resize:vertical;background:#171717;border:1px solid #454545;border-radius:10px;padding:11px;color:#eee;font:inherit;font-size:13px;outline:none}.image-edit-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.image-lightbox-status{font-size:12px;color:#bdbdbd;margin-left:4px}@media(max-width:560px){.image-lightbox{padding:7px}.image-lightbox-panel{max-height:96dvh;border-radius:14px}.image-lightbox-toolbar{padding:9px;gap:6px}.image-action{padding:8px 9px;font-size:11px}.image-lightbox-stage{padding:8px}.image-lightbox-stage img{max-height:calc(96dvh - 145px)}}
+.tool-btn svg{width:19px;height:19px}.send-btn{background:#f5f5f5;color:#171717;border-radius:50%;width:34px;height:34px;display:grid;place-items:center}.send-btn:hover{background:#d7d7d7}.send-btn:disabled{background:#666;color:#303030;cursor:default}.send-btn svg{width:18px;height:18px;stroke-width:2.4}.disclaimer{text-align:center;color:#9b9b9b;font-size:11px;padding-top:9px}.disclaimer a{color:inherit;text-decoration:underline;text-underline-offset:2px}.model-menu{position:absolute;top:50px;left:18px;width:320px;background:#2c2c2c;border:1px solid #414141;border-radius:14px;box-shadow:0 10px 40px #0008;padding:8px;z-index:10;display:none}.model-menu.open{display:block}.menu-heading{padding:8px 10px;color:#a8a8a8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}.model-option{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:11px 10px;border-radius:9px}.model-option:hover,.model-option.selected{background:#414141}.model-option .model-copy{flex:1}.model-option strong{display:block;font-size:13px;font-weight:600}.model-option small{display:block;color:#aaa;font-size:11px;margin-top:3px}.check{color:#ddd}.toast{position:absolute;bottom:105px;left:50%;transform:translateX(-50%);background:#f4f4f4;color:#222;padding:9px 14px;border-radius:10px;font-size:12px;box-shadow:0 5px 20px #0005;display:none;z-index:20}.toast.show{display:block}.overlay{display:none}
+@media(max-width:760px){.sidebar{position:absolute;inset:0 auto 0 0;width:270px;transform:translateX(-100%);box-shadow:8px 0 30px #0005}.sidebar.open{transform:translateX(0)}.overlay.show{display:block;position:absolute;inset:0;background:#0008;z-index:4}.mobile-menu{display:grid}.topbar{padding:0 10px;height:54px}.model-select{font-size:17px;padding:7px 5px}.upgrade{display:none}.share-btn{padding:8px}.share-btn span{display:none}.welcome{padding:22px 18px 10vh}.welcome h1{font-size:26px}.suggestions{grid-template-columns:1fr}.suggestion{min-height:60px}.composer-area{padding:8px 10px max(10px,env(safe-area-inset-bottom))}.messages{padding:18px 15px 25px;gap:23px}.message{gap:10px;font-size:15px}.message .bubble{max-width:calc(100% - 40px)}.message.user .bubble{max-width:88%}.composer{padding:10px 10px 8px}.tool-btn.label{font-size:11px}.disclaimer{font-size:10px}.model-menu{left:10px;top:48px;width:min(320px,calc(100vw - 20px))}}
+@media(min-width:761px){.sidebar.collapsed{width:0;padding-left:0;padding-right:0;overflow:hidden}.sidebar.collapsed *{visibility:hidden}}
+
+.brand{gap:9px}.brand-mark{background:#e9e9e9;color:#171717;border:0;font-size:18px}.desktop-menu-toggle{display:grid}
+.chat-options-menu{position:absolute;right:16px;top:52px;width:230px;padding:7px;background:#2b2b2b;border:1px solid #444;border-radius:13px;box-shadow:0 12px 35px #0008;z-index:30;display:none}.chat-options-menu.open{display:block}.chat-options-menu button{width:100%;display:flex;align-items:center;gap:11px;text-align:left;padding:10px 11px;border-radius:8px;color:#e8e8e8;font-size:13px}.chat-options-menu button:hover{background:#414141}.chat-options-menu button span{flex:1}.chat-options-menu .danger{color:#ff8585}.menu-divider{height:1px;background:#444;margin:5px 7px}.message.search-hit{outline:2px solid #a78bfa;outline-offset:5px;border-radius:5px}.history-item.pinned:before{content:'⌖ ';color:#ddd}.history-item.archived{opacity:.55;text-decoration:line-through}.lock-banner{max-width:800px;margin:0 auto 8px;padding:9px 13px;border-radius:10px;background:#3b3030;color:#ffcece;font-size:12px;display:none}.lock-banner.show{display:block}
+@media(max-width:760px){.desktop-menu-toggle{display:none}.chat-options-menu{right:9px;top:48px}.top-right{gap:2px}}
+
+
+/* ChatGPT-inspired sidebar redesign */
+.sidebar{width:286px;padding:16px 12px 14px;background:#202020;border-right:1px solid #292929}
+.side-top{padding:10px 10px 22px;min-height:66px}
+.brand{font-size:24px;font-weight:650;letter-spacing:-.8px;color:#f5f5f5}
+.brand-mark{display:none}
+.sidebar-search{width:48px;height:48px;border-radius:50%;border:1px solid #414141;background:#292929;color:#f5f5f5}
+.sidebar-search svg{width:24px;height:24px;stroke-width:2}
+.nav{gap:2px}
+.nav-btn{height:48px;padding:0 15px;gap:15px;border-radius:10px;font-size:16px;font-weight:450;color:#f0f0f0}
+.nav-btn svg{width:24px;height:24px;flex-shrink:0;stroke-width:2}
+.nav-btn.active{background:#3c3c3c}
+.nav-btn:hover{background:#2d2d2d}
+.side-section{margin-top:26px;flex:1;min-height:0;gap:0}
+.history-divider{height:1px;background:#424242;margin:0 10px 20px;flex-shrink:0}
+.history{gap:2px;padding:0 0 8px;scrollbar-width:thin;scrollbar-color:#4a4a4a transparent}
+.history-item{height:49px;flex-shrink:0;border-radius:0;padding:0 15px;font-size:15px;color:#f0f0f0;font-weight:400}
+.history-item:hover{background:#2d2d2d}
+.history-item.pinned{background:#3b3b3b}
+.history-item.pinned:before{content:'⌖ ';color:#d5d5d5}
+.side-bottom{border-top:0;padding:12px 6px 0;display:flex;flex-direction:column;gap:18px}
+.bottom-chat-btn{align-self:flex-start;display:flex;align-items:center;justify-content:center;gap:10px;background:#3767ed;color:white;border-radius:999px;padding:12px 18px;min-width:143px;height:58px;font-size:16px}
+.bottom-chat-btn svg{width:22px;height:22px;stroke-width:2}
+.bottom-chat-btn:hover{background:#4777ff}
+.profile{width:100%;padding:6px 5px;display:flex;align-items:center;gap:10px;text-align:left;border-radius:12px}
+.profile:hover{background:#2d2d2d}
+.avatar{width:42px;height:42px;border-radius:50%;background:#737b7d;border:5px solid #303637;outline:1px solid #545b5d;font-size:12px;flex-shrink:0}
+.profile-info{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.profile-name{font-size:13px;font-weight:600}
+.profile-plan{font-size:11px;color:#aaa;margin-top:0}
+.profile-more{width:28px;height:28px;display:grid;place-items:center;color:#aaa}
+.profile-more svg{width:19px;height:19px}
+@media(max-width:760px){.sidebar{width:min(310px,86vw);padding:14px 12px max(14px,env(safe-area-inset-bottom))}.side-top{padding:8px 9px 20px}.brand{font-size:25px}.nav-btn{height:49px;font-size:16px}.history-item{height:49px;font-size:15px}.side-bottom{gap:16px}.bottom-chat-btn{height:56px}}
+
+
+/* LARK Settings v1.0 */
+.settings-backdrop{position:fixed;inset:0;z-index:80;background:transparent;display:none}.settings-backdrop.open{display:block}
+.settings-shell{position:fixed;z-index:999;inset:0;background:#171717;border:0;border-radius:0;color:#eee;display:none;overflow:hidden;box-shadow:0 18px 70px #0008}.settings-shell.open{display:flex}.settings-side{width:248px;flex-shrink:0;background:#1d1d1d;border-right:1px solid #303030;padding:22px 12px;display:flex;flex-direction:column;gap:14px}.settings-brand{display:flex;align-items:center;gap:10px;padding:0 8px 4px;font-weight:700;font-size:18px}.settings-search{margin:0 5px;width:calc(100% - 10px);border:1px solid #3c3c3c;background:#252525;color:#eee;border-radius:10px;padding:10px 12px;outline:none}.settings-nav{display:flex;flex-direction:column;gap:3px;overflow:auto}.settings-nav button{display:flex;align-items:center;gap:10px;text-align:left;color:#c9c9c9;border:0;background:transparent;padding:11px 12px;border-radius:9px;font-size:13px}.settings-nav button.active,.settings-nav button:hover{background:#333;color:#fff}.settings-main{min-width:0;flex:1;display:flex;flex-direction:column}.settings-head{display:flex;align-items:center;gap:12px;padding:22px 26px;border-bottom:1px solid #303030}.settings-head h2{font-size:20px;margin:0;font-weight:650}.settings-head p{margin:4px 0 0;color:#999;font-size:12px}.settings-close{margin-left:auto;border:1px solid #414141;background:#262626;color:#eee;border-radius:9px;width:36px;height:36px;font-size:20px}.settings-content{overflow:auto;padding:22px 26px 34px;max-width:900px;width:100%;margin:0 auto}.settings-section-title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#999;margin:24px 0 10px}.settings-section-title:first-child{margin-top:0}.setting-row{display:flex;align-items:center;gap:20px;padding:15px 0;border-bottom:1px solid #2e2e2e;min-height:60px}.setting-copy{flex:1;min-width:0}.setting-copy strong{display:block;font-size:14px;font-weight:550}.setting-copy small{display:block;font-size:12px;line-height:1.5;color:#999;margin-top:4px}.setting-control{max-width:240px;min-width:135px;background:#252525;color:#eee;border:1px solid #414141;border-radius:9px;padding:9px 10px;font:inherit;font-size:12px}.setting-control[type=checkbox]{min-width:0;width:18px;height:18px;accent-color:#477fe8}.setting-control[type=range]{padding:0;accent-color:#477fe8}.setting-control.textarea{min-width:220px;min-height:76px;resize:vertical}.setting-action{background:#292929;border:1px solid #414141;border-radius:9px;color:#eee;padding:9px 12px;font-size:12px;white-space:nowrap}.setting-action.danger{color:#ff8d8d;border-color:#663838}.settings-status{font-size:11px;color:#8fc7a1;padding:0 26px 12px}.settings-empty{color:#999;font-size:13px;padding:25px 5px}.settings-mobile-back{display:none;background:transparent;border:0;color:#eee;font-size:20px}
+@media(max-width:760px){.settings-shell{inset:0;border-radius:0;border:0}.settings-side{width:100%;border:0;padding:14px 14px 22px}.settings-main{display:none}.settings-shell.mobile-detail .settings-side{display:none}.settings-shell.mobile-detail .settings-main{display:flex}.settings-head{padding:15px 16px}.settings-content{padding:18px 17px 30px}.settings-mobile-back{display:block}.settings-head h2{font-size:18px}.setting-row{gap:10px;align-items:flex-start;flex-wrap:wrap}.setting-copy{min-width:55%;}.setting-control{max-width:48%;min-width:125px}.setting-control.textarea{max-width:100%;min-width:100%}.settings-status{padding:0 17px 12px}.settings-brand{padding:5px 8px}}
+
+@media(max-width:600px){.youtube-card{grid-template-columns:1fr;grid-template-rows:auto auto auto auto;row-gap:8px}.youtube-thumb-wrap{grid-column:1;grid-row:auto;width:100%;border-radius:12px}.youtube-card-title{font-size:16px}.youtube-meta{padding-bottom:2px}.youtube-card-description{font-size:13px}.youtube-player{grid-column:1}}
+
+/* Hyper LARK 2.1 — inline clarification cards */
+.clarify-card{margin-top:12px;border:1px solid #414141;border-radius:16px;padding:15px;background:linear-gradient(145deg,#242424,#1d1d1d);max-width:620px}.clarify-card h3{font-size:16px;margin:0 0 6px;font-weight:650}.clarify-card p{font-size:13px;color:#b8b8b8;margin:0 0 12px}.clarify-options{display:flex;flex-wrap:wrap;gap:8px}.clarify-option{border:1px solid #484848;background:#303030;border-radius:999px;padding:9px 13px;font-size:13px;color:#f2f2f2;cursor:pointer}.clarify-option:hover{background:#3a3a3a;border-color:#777}.clarify-skip{margin-top:12px;color:#aaa;background:transparent;border:0;text-decoration:underline;font-size:12px;padding:4px 0;cursor:pointer}.clarify-card .clarify-progress{font-size:11px;color:#888;margin-bottom:8px}
+</style>
+ <script src="https://js.puter.com/v2/"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+<style>
+.message-text{min-width:0;line-height:1.75;overflow-wrap:anywhere}.message-text>*:first-child{margin-top:0}.message-text>*:last-child{margin-bottom:0}.message-text h1,.message-text h2,.message-text h3,.message-text h4{line-height:1.3;margin:1.15em 0 .55em;font-weight:650;letter-spacing:-.3px}.message-text h1{font-size:1.45em}.message-text h2{font-size:1.25em}.message-text h3{font-size:1.1em}.message-text p{margin:.65em 0}.message-text ul,.message-text ol{padding-left:1.6em;margin:.55em 0}.message-text li{padding-left:.2em;margin:.22em 0}.message-text li>ul,.message-text li>ol{margin:.2em 0}.message-text blockquote{margin:.8em 0;padding:.15em 0 .15em 1em;border-left:3px solid #666;color:#c9c9c9}.message-text a{color:#8ab4f8;text-decoration:underline;text-underline-offset:2px}.message-text table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:1em 0;font-size:.92em}.message-text th,.message-text td{border:1px solid #505050;padding:8px 10px;text-align:left;white-space:normal}.message-text th{background:#343434;font-weight:650}.message-text pre{position:relative;background:#151515;border:1px solid #393939;border-radius:10px;padding:14px;overflow:auto;max-width:100%;margin:.8em 0}.message-text pre code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.88em;line-height:1.55;white-space:pre}.message-text :not(pre)>code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#3a3a3a;border-radius:5px;padding:.12em .35em;font-size:.9em}.message-text hr{border:0;border-top:1px solid #454545;margin:1.2em 0}.message-text img{max-width:100%;height:auto;border-radius:8px}.message-text .katex-display{overflow-x:auto;overflow-y:hidden;padding:.3em 0}.code-wrap{position:relative}.code-copy{position:absolute;right:8px;top:8px;background:#333;border:1px solid #555;border-radius:6px;padding:5px 8px;font-size:11px;color:#eee;z-index:1}
+
+/* Compact composer attachment panel: anchored above +, without a backdrop */
+.composer-wrap{position:relative}
+.add-chat-panel{position:absolute;left:0;bottom:82px;width:min(430px,calc(100vw - 36px));padding:12px;background:#242424;border:1px solid #3a3a3a;border-radius:18px;box-shadow:0 12px 34px #0005;z-index:40;display:none;transform-origin:bottom left}
+.add-chat-panel.open{display:block;animation:panelIn .13s ease-out}
+@keyframes panelIn{from{opacity:.7;transform:translateY(5px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+.add-chat-head{display:flex;align-items:center;justify-content:space-between;padding:0 2px 10px;font-size:14px;font-weight:650}
+.add-chat-close{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#cfcfcf}
+.add-chat-close:hover,.add-chat-action:hover{background:#353535}
+.add-chat-media{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:9px}
+.add-chat-media button{min-height:78px;border-radius:14px;background:#2d2d2d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:13px}
+.add-chat-media svg{width:22px;height:22px}
+.add-chat-action{width:100%;min-height:48px;display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:11px;text-align:left;font-size:14px}
+.add-chat-action .action-icon{width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;border-radius:50%;background:#393939}
+.add-chat-action .action-icon svg{width:18px;height:18px}
+.add-chat-action .action-copy{flex:1;min-width:0}.add-chat-action small{display:block;color:#999;font-size:11px;margin-top:2px}
+.add-chat-action .chevron{color:#999;width:16px;height:16px}
+.add-chat-switch{width:37px;height:22px;border-radius:99px;background:#555;padding:3px;display:flex;align-items:center;flex-shrink:0;transition:background .15s}
+.add-chat-switch:after{content:'';width:16px;height:16px;background:#eee;border-radius:50%;transition:transform .15s}
+.add-chat-switch.on{background:#3478d4}.add-chat-switch.on:after{transform:translateX(15px)}
+.add-chat-sep{height:1px;background:#353535;margin:3px 0}
+@media(max-width:760px){.add-chat-panel{left:0;bottom:80px;width:min(430px,calc(100vw - 22px));padding:10px;border-radius:17px}.add-chat-media button{min-height:74px}.add-chat-action{min-height:47px}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-top">
+      <div class="brand"><span>LARK</span></div>
+      <button class="icon-btn sidebar-search" id="searchBtn" aria-label="Search chats" title="Search chats"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg></button>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn" id="imagesBtn"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="13" height="13" rx="2"/><rect x="8" y="3" width="13" height="13" rx="2"/><circle cx="12" cy="8" r="1.5"/><path d="m8 15 3-3 3 3"/></svg>Images</button>
+      <button class="nav-btn" id="libraryBtn"><svg viewBox="0 0 24 24"><path d="M4 5.5 8 4v16l-4 1zM10 4h4v16h-4zM16 4h3l2 16h-3z"/></svg>Library</button>
+      <button class="nav-btn" id="projectsBtn"><svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><path d="M3 9h18"/></svg>Projects</button>
+      <button class="nav-btn" id="remoteBtn"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="12" rx="2"/><path d="M2 19h20M8 15v4M16 15v4M6 22h12"/></svg>Remote</button>
+      <button class="nav-btn" id="scheduledBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l-3 2"/></svg>Scheduled</button>
+      <button class="nav-btn" id="pluginsBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 9a2 2 0 1 1 4 0v2h2a2 2 0 1 1 0 4h-2v-2a2 2 0 1 0-4 0v2"/></svg>Plugins</button>
+    </nav>
+    <div class="side-section"><div class="history-divider"></div><div class="history" id="history"><button class="history-item">Welcome to your demo</button></div></div>
+    <div class="side-bottom">
+      <button class="bottom-chat-btn" id="newChatBtn"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>Chat</span></button>
+      <button class="profile" id="profileMenu" aria-label="Profile menu"><span class="avatar">S</span><span class="profile-info"><span class="profile-name">LARK</span><span class="profile-plan">Personal AI assistant</span></span><span class="profile-more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span></button>
+    </div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left"><button class="icon-btn mobile-menu" id="mobileMenu" aria-label="Open menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><button class="model-select" id="modelBtn">Apex 3.1 <span class="subtle">▾</span></button></div>
+      <div class="top-right"><button class="icon-btn desktop-menu-toggle" id="sidebarToggle" aria-label="Toggle sidebar" title="Toggle sidebar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button><button class="icon-btn" id="chatMenuBtn" aria-label="Chat options" title="Chat options"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button></div>
+    </header>
+    <div class="model-menu" id="modelMenu">
+      <div class="menu-heading">Choose your LARK model · strongest to fastest</div>
+      <button class="model-option" data-model="Lark max"><span>✦</span><span class="model-copy"><strong>Lark max</strong><small>GPT-6 Astra · highest capability</small></span><span class="check">✓</span></button>
+      <button class="model-option" data-model="Dirt nobe"><span>◆</span><span class="model-copy"><strong>Dirt nobe</strong><small>GPT-6 Sol · advanced reasoning</small></span><span class="check"></span></button>
+      <button class="model-option" data-model="Apex 3.8"><span>◇</span><span class="model-copy"><strong>Apex 3.8</strong><small>Claude Sonnet 5.5 · balanced</small></span><span class="check"></span></button>
+      <button class="model-option" data-model="Apex 3.1"><span>✧</span><span class="model-copy"><strong>Apex 3.1</strong><small>Gemini 3.8 Flash · fast</small></span><span class="check"></span></button>
+    </div>
+    <div class="chat-options-menu" id="chatOptionsMenu" role="menu" aria-label="Chat options">
+      <button data-action="share">↗ <span>Share chat</span></button>
+      <button data-action="pin">⌖ <span>Pin chat</span></button>
+      <button data-action="lock">♙ <span>Lock chats</span></button>
+      <button data-action="files">＋ <span>Uploaded files</span></button>
+      <button data-action="find">⌕ <span>Find in chat</span></button>
+      <button data-action="home">⌂ <span>Add to home screen</span></button>
+      <div class="menu-divider"></div>
+      <button data-action="archive">▣ <span>Archive chat</span></button>
+      <button class="danger" data-action="delete">⌫ <span>Delete chat</span></button>
+    </div>
+    <div class="chat-scroll" id="chatScroll">
+      <section class="welcome" id="welcome">
+        <h1>What can LARK help with?</h1>
+        <div class="suggestions">
+          <button class="suggestion" data-prompt="Explain a difficult topic to me in simple terms"><strong>✦ Learn something</strong><span>Explain a difficult topic simply</span></button>
+          <button class="suggestion" data-prompt="Help me brainstorm creative ideas for a project"><strong>♧ Brainstorm</strong><span>Explore ideas and possibilities</span></button>
+          <button class="suggestion" data-prompt="Write a polished message for me"><strong>✎ Write anything</strong><span>Draft, rewrite, or improve text</span></button>
+          <button class="suggestion" data-prompt="Help me solve a problem step by step"><strong>⌘ Solve a problem</strong><span>Work through it step by step</span></button>
+        </div>
+      </section>
+      <section class="messages" id="messages" hidden></section>
+    </div>
+    <div class="composer-area">
+      <div class="composer-wrap">
+        <input id="filePicker" type="file" multiple hidden>
+        <input id="photoPicker" type="file" accept="image/*" multiple hidden>
+        <input id="cameraPicker" type="file" accept="image/*" capture="environment" hidden>
+        <div class="add-chat-panel" id="addChatPanel" role="dialog" aria-label="Add to chat" aria-hidden="true">
+          <div class="add-chat-head"><span>Add to chat</span><button type="button" class="add-chat-close" id="closeAddChat" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+          <div class="add-chat-media">
+            <button type="button" id="cameraAction"><svg viewBox="0 0 24 24"><path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Camera</span></button>
+            <button type="button" id="photosAction"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span>Photos</span></button>
+            <button type="button" id="filesAction"><svg viewBox="0 0 24 24"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10Z"/><path d="M13 3v7h7M12 17V11m-3 3 3-3 3 3"/></svg><span>Files</span></button>
+          </div>
+          <button type="button" class="add-chat-action" id="projectAction"><span class="action-icon"><svg viewBox="0 0 24 24"><path d="M3 7h18M5 7l1 13h12l1-13M9 4h6"/></svg></span><span class="action-copy">Add to project<small id="projectStatus">None</small></span><svg class="chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+          <div class="add-chat-sep"></div>
+          <button type="button" class="add-chat-action" id="webSearchToggle" aria-pressed="false"><span class="action-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></span><span class="action-copy">Web search<small>Search the web for current information</small></span><span class="add-chat-switch" id="webSearchSwitch"></span></button>
+          <div class="add-chat-sep"></div>
+          <button type="button" class="add-chat-action" id="connectorsAction"><span class="action-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v7m-3.5-3.5h7"/></svg></span><span class="action-copy">Connectors<small>Connect apps and services</small></span><svg class="chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+          <div class="add-chat-sep"></div>
+          <button type="button" class="add-chat-action" id="memoryToggle" aria-pressed="true"><span class="action-icon"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 1-2.3-5.6M20 4v5h-5M8 12h8m-4-4v8"/></svg></span><span class="action-copy">Memory<small>Use saved chat context</small></span><span class="add-chat-switch on" id="memorySwitch"></span></button>
+        </div>
+        <div class="lock-banner" id="lockBanner"></div>
+        <div class="composer">
+          <textarea id="prompt" rows="1" placeholder="Message LARK" aria-label="Message LARK"></textarea>
+          <div class="composer-tools">
+            <div class="tools-left">
+              <button class="tool-btn" id="attachBtn" title="Attach files (demo)"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+              <button class="tool-btn label" id="toolsBtn"><svg viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1"/><circle cx="12" cy="12" r="4"/></svg>Tools</button>
+              <div class="tools-menu" id="toolsMenu" role="menu" aria-hidden="true"><button type="button" id="createImageTool" role="menuitem">🎨 <span>Create image<small style="display:block;color:#aaa;margin-top:3px">Generate with Nano Banana 2.1</small></span></button><button type="button" id="generateVideoTool" role="menuitem">🎬 <span>Generate video<small style="display:block;color:#aaa;margin-top:3px">Create a video with Puter.js</small></span></button></div>
+            </div>
+            <div class="tools-right">
+              <button class="tool-btn" id="voiceBtn" title="Voice (demo)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-4 0h8"/></svg></button>
+              <button class="send-btn" id="sendBtn" aria-label="Send message" disabled><svg viewBox="0 0 24 24"><path d="M12 19V5m-7 7 7-7 7 7"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="disclaimer">LARK can make mistakes. Check important information.</div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+<div class="settings-backdrop" id="settingsBackdrop"></div>
+<section class="settings-shell" id="settingsShell" role="dialog" aria-modal="true" aria-label="LARK Settings">
+  <aside class="settings-side" id="settingsSide">
+    <div class="settings-brand"><span class="brand-mark">L</span><span>LARK Settings</span></div>
+    <input class="settings-search" id="settingsSearch" type="search" placeholder="Search settings..." aria-label="Search settings">
+    <nav class="settings-nav" id="settingsNav"></nav>
+  </aside>
+  <div class="settings-main">
+    <header class="settings-head"><button class="settings-mobile-back" id="settingsBack" aria-label="Back to categories">←</button><div><h2 id="settingsHeading">General</h2><p id="settingsSubheading">Customize your LARK experience</p></div><button class="settings-close" id="settingsClose" aria-label="Close settings">×</button></header>
+    <div class="settings-content" id="settingsContent"></div><div class="settings-status" id="settingsStatus">Changes save automatically on this browser.</div>
+  </div>
+</section>
+
+  </main>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const sidebar=$('#sidebar'),overlay=$('#overlay'),promptBox=$('#prompt'),sendBtn=$('#sendBtn'),welcome=$('#welcome'),messages=$('#messages'),scroll=$('#chatScroll'),history=$('#history'),toast=$('#toast');
+let chatCount=0, activeTitle='New chat', toastTimer, currentModel='Apex 3.1', chatLocked=false, currentHistoryItem=null, archivedChats=[];
+// Core chat state required by the send handler.
+let conversation = [];
+let requestInProgress = false;
+const STORAGE_KEY='lark_browser_data_v1';
+let savedChats=[]; let activeChatId=null;
+function persistState(){try{const active=savedChats.find(c=>c.id===activeChatId);if(active){active.title=activeTitle;active.messages=conversation;active.model=currentModel;active.pinned=!!currentHistoryItem?.classList.contains('pinned');}localStorage.setItem(STORAGE_KEY,JSON.stringify({chats:savedChats,activeChatId,currentModel,chatLocked:false}));}catch(e){notify('Browser storage is full or unavailable. Export your chats or clear old data.')}}
+function renderHistory(){history.innerHTML='';const sorted=[...savedChats].sort((a,b)=>Number(!!b.pinned)-Number(!!a.pinned)||b.updatedAt-a.updatedAt);for(const chat of sorted){if(chat.archived)continue;const item=document.createElement('button');item.className='history-item'+(chat.pinned?' pinned':'');item.textContent=chat.title||'New chat';item.title=item.textContent;item.dataset.chatId=chat.id;item.addEventListener('click',()=>loadChat(chat.id));history.appendChild(item);if(chat.id===activeChatId)currentHistoryItem=item;}}
+function loadChat(id){if(requestInProgress){notify('Wait for the current response to finish first');return}const chat=savedChats.find(c=>c.id===id);if(!chat)return;activeChatId=id;activeTitle=chat.title;conversation=Array.isArray(chat.messages)?chat.messages:[];currentModel=chat.model||currentModel;updateModelMenu();chatLocked=false;promptBox.disabled=false;$('#lockBanner')?.classList.remove('show');messages.innerHTML='';for(const m of conversation){if(m.role==='user')addMessage(m.content,'user');else if(m.role==='assistant')addMessage(m.content,'assistant')}messages.hidden=conversation.length===0;welcome.hidden=conversation.length>0;welcome.style.display=conversation.length>0?'none':'';currentHistoryItem=[...history.children].find(x=>x.dataset.chatId===id)||null;renderHistory();scroll.scrollTop=scroll.scrollHeight;persistState();if(innerWidth<=760)closeMobile()}
+function restoreState(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;const data=JSON.parse(raw);savedChats=Array.isArray(data.chats)?data.chats:[];currentModel=data.currentModel||currentModel;chatCount=savedChats.length;updateModelMenu();renderHistory();if(data.activeChatId&&savedChats.some(c=>c.id===data.activeChatId))loadChat(data.activeChatId);}catch(e){console.warn('LARK saved data could not be restored',e)}}
+window.addEventListener('pagehide',persistState);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persistState()});
+const MODEL_IDS = {
+  'Apex 3.1': 'google/gemini-3.8-flash',
+  'Apex 3.8': 'anthropic/claude-sonnet-5-5',
+  'Dirt nobe': 'openai/gpt-6-sol',
+  'Lark max': 'openai/gpt-6-astra'
+};
+function notify(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2300)}
+function fit(){promptBox.style.height='auto';promptBox.style.height=Math.min(promptBox.scrollHeight,200)+'px';sendBtn.disabled=!promptBox.value.trim()}
+promptBox.addEventListener('input',fit);
+promptBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
+function newChat(){if(requestInProgress){notify('Wait for the current response to finish first');return}persistState();activeChatId=null;activeTitle='New chat';conversation=[];chatLocked=false;promptBox.disabled=false;$('#lockBanner')?.classList.remove('show');currentHistoryItem=null;welcome.hidden=false;welcome.style.display='';messages.hidden=true;messages.innerHTML='';promptBox.value='';fit();$('#modelMenu').classList.remove('open');$('#chatOptionsMenu').classList.remove('open');if(innerWidth<=760)closeMobile();persistState();promptBox.focus()}
+$('#newChatBtn').addEventListener('click',newChat);
+$('#collapseBtn')?.addEventListener('click',()=>{if(innerWidth<=760)closeMobile();else sidebar.classList.add('collapsed')});
+$('#mobileMenu').addEventListener('click',()=>{sidebar.classList.add('open');overlay.classList.add('show')});
+$('#sidebarToggle').addEventListener('click',()=>{if(innerWidth<=760){sidebar.classList.add('open');overlay.classList.add('show')}else sidebar.classList.toggle('collapsed')});
+function closeMobile(){sidebar.classList.remove('open');overlay.classList.remove('show')}
+overlay.addEventListener('click',closeMobile);
+$('#modelBtn').addEventListener('click',()=>$('#modelMenu').classList.toggle('open'));
+document.addEventListener('click',e=>{if(!e.target.closest('#modelBtn')&&!e.target.closest('#modelMenu'))$('#modelMenu').classList.remove('open')});
+function updateModelMenu(){
+  document.querySelectorAll('.model-option').forEach(b=>{
+    const selected=b.dataset.model===currentModel;
+    b.classList.toggle('selected',selected);
+    const check=b.querySelector('.check');
+    if(check) check.textContent=selected?'✓':'';
+    b.setAttribute('aria-pressed',String(selected));
+  });
+  $('#modelBtn').innerHTML=currentModel+' <span class="subtle">▾</span>';
+}
+document.querySelectorAll('.model-option').forEach(b=>b.addEventListener('click',()=>{
+  currentModel=b.dataset.model;
+  if(typeof larkSettings!=='undefined' && larkSettings.rememberLastModel!==false){larkSettings.defaultModel=currentModel;try{localStorage.setItem('lark_settings_v1',JSON.stringify(larkSettings))}catch(e){}}
+  updateModelMenu();
+  $('#modelMenu').classList.remove('open');
+  const id=MODEL_IDS[currentModel];
+  persistState();notify('Selected '+currentModel+' · Puter.js routing active');
+}));
+document.querySelectorAll('.suggestion').forEach(b=>b.addEventListener('click',()=>{promptBox.value=b.dataset.prompt;fit();promptBox.focus()}));
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderAssistantMarkdown(raw){
+  const source=String(raw??'');
+  // KaTeX-friendly delimiters: keep math delimiters for auto-render.
+  let html;
+  try{
+    if(window.marked){
+      marked.setOptions({gfm:true,breaks:false});
+      html=marked.parse(source,{async:false});
+    }else{
+      html='<p>'+escapeHTML(source).replace(/\n/g,'<br>')+'</p>';
+    }
+    html=window.DOMPurify?DOMPurify.sanitize(html,{USE_PROFILES:{html:true}}):html;
+  }catch(e){html='<p>'+escapeHTML(source).replace(/\n/g,'<br>')+'</p>';}
+  const wrapper=document.createElement('div');
+  wrapper.innerHTML=html;
+  if(window.renderMathInElement){
+    try{renderMathInElement(wrapper,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}],throwOnError:false,strict:'ignore'});}catch(e){}
+  }
+  wrapper.querySelectorAll('a').forEach(a=>{a.target='_blank';a.rel='noopener noreferrer';});
+  wrapper.querySelectorAll('pre').forEach(pre=>{
+    const code=pre.querySelector('code');if(!code)return;
+    const btn=document.createElement('button');btn.className='code-copy';btn.type='button';btn.textContent='Copy code';
+    btn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(code.innerText);btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy code',1200)}catch{notify('Copy is unavailable in this browser')}});
+    pre.style.paddingTop='42px';pre.appendChild(btn);
+  });
+  return wrapper.innerHTML;
+}
+function addMessage(text,who){
+  const article=document.createElement('article');
+  article.className='message '+who;
+  if(who==='user'){
+    article.setAttribute('aria-label','Your message. Long-press for options.');
+    const bubble=document.createElement('div');
+    bubble.className='bubble';
+    bubble.textContent=text;
+    article.appendChild(bubble);
+  }else{
+    const mark=document.createElement('div');
+    mark.className='avatar-mini assistant-mark';
+    mark.textContent='✳';
+    const body=document.createElement('div');
+    body.className='bubble';
+    const textEl=document.createElement('div');
+    textEl.className='message-text';
+    // Render Markdown safely; fall back to readable plain text if libraries are offline.
+    if(String(text).startsWith('[[LARK_YOUTUBE_RESULTS]]')){
+      try{const saved=JSON.parse(String(text).slice('[[LARK_YOUTUBE_RESULTS]]'.length));const intro=document.createElement('div');intro.textContent='Here are YouTube videos matching your search:';textEl.appendChild(intro);renderYouTubeCards(textEl,saved);}catch(e){textEl.textContent='Saved YouTube results could not be restored.';}
+    }else if(String(text).startsWith('[[LARK_CLARIFICATION]]')){try{const spec=JSON.parse(String(text).slice('[[LARK_CLARIFICATION]]'.length));const card=document.createElement('div');card.className='clarify-card';const title=document.createElement('h3');title.textContent=spec.question;const hint=document.createElement('p');hint.textContent='This was a clarification prompt from an earlier turn.';card.append(title,hint);textEl.appendChild(card);}catch(e){textEl.textContent='Clarification prompt.';}}else{textEl.innerHTML=renderAssistantMarkdown(text);} 
+    const actions=document.createElement('div');
+    actions.className='message-actions';
+    actions.innerHTML='<button title="Copy" class="copy" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg></button><button title="Good response" aria-label="Good response"><svg viewBox="0 0 24 24"><path d="M7 10v11H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Zm0 0 5-8a3 3 0 0 1 2 3l-1 5h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 2H7"/></svg></button><button title="Bad response" aria-label="Bad response"><svg viewBox="0 0 24 24"><path d="M7 14V3H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2Zm0 0 5 8a3 3 0 0 0 2-3l-1-5h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-2H7"/></svg></button>';
+    body.append(textEl,actions);
+    article.append(mark,body);
+    const copy=actions.querySelector('.copy');
+    copy.addEventListener('click',async()=>{
+      try { await navigator.clipboard.writeText(text); notify('Copied to clipboard'); }
+      catch { notify('Could not copy in this browser'); }
+    });
+  }
+  messages.appendChild(article);
+  return article;
+}
+function extractPuterText(response){
+  if(typeof response==='string') return response;
+  if(response?.message?.content != null){
+    const content=response.message.content;
+    if(typeof content==='string') return content;
+    if(Array.isArray(content)) return content.map(x=>x.text||'').join('\n');
+    return String(content);
+  }
+  if(response?.text != null) return String(response.text);
+  return JSON.stringify(response,null,2);
+}
+/* Hyper LARK 2.1: adaptive clarification intelligence. Ask only when a missing choice changes the answer materially. */
+function getClarificationSpec(text){
+  const raw=String(text||'').trim(), t=raw.toLowerCase();
+  if(!raw || raw.length>220 || /\b(just answer|don't ask|do not ask|no questions|make assumptions|best guess)\b/.test(t)) return null;
+  // Specific queries should be answered directly; these rules only catch genuinely underspecified goals.
+  if(/^(hi|hello|hey|thanks|thank you|ok|okay|hmm)[!. ]*$/i.test(raw)) return null;
+  if(/\b(help me|i need help|can you help me|help me with this)\b/.test(t) && !/\b(with|about)\s+[a-z0-9]{3,}/.test(t)) return {question:'Of course — what would you like help with?',hint:'Choose the closest goal, or type your own details.',options:['Study or exam prep','Coding or fixing a bug','Writing or creating something','Personal advice or planning']};
+  if(/\b(teach me coding|learn coding|learn programming|start coding|learn to code)\b/.test(t) && !/\b(python|javascript|java|c\+\+|html|css|beginner|advanced|project)\b/.test(t)) return {question:'What kind of coding path would help you most?',hint:'I’ll tailor the starting point and examples to your choice.',options:['Absolute beginner','Build websites','Build apps or games','AI and automation']};
+  if(/\b(make|create|build|give me|prepare)\b.{0,20}\b(plan|roadmap|routine|schedule)\b/.test(t) && !/\b(for|to)\s+(my|class|exam|study|fitness|gym|business|project|coding|trip|travel|workout|weight|muscle|revision)\b/.test(t)) return {question:'What should this plan focus on?',hint:'Pick a goal so the plan is actually useful.',options:['Study or exams','Fitness or workout','Learn a skill','Business or project']};
+  if(/\b(recommend|suggest|choose)\b.{0,35}\b(movie|film|show|series|drama|anime)\b/.test(t) && !/\b(romance|comedy|thriller|horror|action|sci.?fi|sad|emotional|hindi|korean|english)\b/.test(t)) return {question:'What kind of watch are you in the mood for?',hint:'I can also make a balanced recommendation if you skip this.',options:['Emotional romance','Comedy and feel-good','Mystery or thriller','Anything genuinely great']};
+  if(/\b(explain|teach|help me understand)\b/.test(t) && /\b(this|it|that|the topic|the chapter|the concept)\b/.test(t) && !/\b(what|which|named|called|about)\b.{0,45}\b[a-z]{4,}\b/.test(t)) return {question:'What exactly should I explain?',hint:'Send the topic, chapter, screenshot, or text for a precise explanation.',options:['I’ll type the topic','I’ll upload a screenshot/file','Explain the previous message','Give a simple overview first']};
+  if(/^(make me|create for me|design me|write me)\s+(a |an |some )?(website|app|project|something|content|a plan)\s*[.!?]*$/i.test(raw)) return {question:'Let’s narrow it down so I build the right thing.',hint:'Choose the type; you can add details in the next message.',options:['Website','Mobile/web app','Writing or social content','Suggest ideas first']};
+  return null;
+}
+function showClarificationCard(spec, originalText){
+  const article=document.createElement('article');article.className='message';
+  const avatar=document.createElement('div');avatar.className='avatar-mini assistant-mark';avatar.textContent='✳';
+  const body=document.createElement('div');body.className='message-body';
+  const card=document.createElement('section');card.className='clarify-card';card.setAttribute('aria-label','Clarifying question');
+  const progress=document.createElement('div');progress.className='clarify-progress';progress.textContent='LARK HYPER INTELLIGENCE 2.1 · QUICK CLARIFICATION';
+  const title=document.createElement('h3');title.textContent=spec.question;
+  const hint=document.createElement('p');hint.textContent=spec.hint||'Choose an option to tailor the answer.';
+  const options=document.createElement('div');options.className='clarify-options';
+  spec.options.forEach(option=>{const b=document.createElement('button');b.type='button';b.className='clarify-option';b.textContent=option;b.addEventListener('click',()=>{if(requestInProgress)return;promptBox.value=option;fit();sendMessage();});options.appendChild(b);});
+  const skip=document.createElement('button');skip.type='button';skip.className='clarify-skip';skip.textContent='Skip questions and answer with a reasonable assumption';skip.addEventListener('click',()=>{if(requestInProgress)return;promptBox.value='Make a reasonable best-effort assumption and answer my original request: '+originalText;fit();sendMessage();});
+  card.append(progress,title,hint,options,skip);body.appendChild(card);article.append(avatar,body);messages.appendChild(article);scroll.scrollTop=scroll.scrollHeight;
+  conversation.push({role:'assistant',content:'[[LARK_CLARIFICATION]]'+JSON.stringify(spec)});persistState();
+}
+
+/* Hyper LARK Intelligence 2.1: intent, adaptive clarification, response strategy, and context-aware instructions. */
+function analyzePromptIntent(text){
+  const raw=String(text||'').trim();
+  const t=raw.toLowerCase();
+  const has=(re)=>re.test(t);
+  // Avoid turning requests for instructions about drawing into image generation.
+  const asksHowTo=/\b(how\s+(?:do\s+i|to)|teach\s+me\s+to|steps\s+to|guide\s+to|explain\s+how\s+to)\b.{0,55}\b(generate|create|make|draw|paint|design)\b/.test(t) || /\bhow\s+do\s+i\s+(?:draw|paint|design)\b/.test(t);
+  // Explicit YouTube requests should search for existing videos, not generate new footage.
+  const youtubeIntent = has(/\b(youtube|you tube|yt video|youtube video|youtube videos)\b/) && has(/\b(find|search|show|suggest|recommend|give|send|watch|play|provide|looking for|best|top|video|videos|tutorial|song|music|lecture|review|trailer)\b/);
+  const asksExistingVideo = has(/\b(find|search|show|suggest|recommend|give me|send me|watch|play|provide)\b.{0,65}\b(video|videos|tutorial|lecture|song|music|review|trailer|documentary)\b/) && !has(/\b(generate|create|make|produce|render)\b.{0,30}\b(video|vedio|clip|animation)\b/);
+  if (youtubeIntent || asksExistingVideo) return {type:'youtube-search',label:'YouTube search',strategy:'Find relevant existing YouTube videos and present them as titled thumbnail cards that can play inside the chat. Do not invent results or substitute plain raw links.',format:'visual'};
+  const videoAction=has(/\b(generate|create|make|produce|render)\b/);
+  const videoNoun=has(/\b(video|vedio|clip|animation|animated\s+video|movie)\b/);
+  const videoLead=has(/^\s*(?:please\s+)?(?:generate|create|make|produce|render)\s+(?:me\s+)?(?:a\s+)?(?:video|vedio|clip|animation)\b/);
+  if(!asksHowTo && videoAction && (videoNoun||videoLead)) return {type:'video',label:'Video generation',strategy:'Generate the requested video using the video-generation tool. Do not substitute a text description for the requested video.',format:'visual'};
+  const imageAction=has(/\b(generate|create|make|draw|paint|render|produce)\b/);
+  const imageNoun=has(/\b(image|picture|photo|photograph|illustration|artwork|wallpaper|logo|poster|thumbnail|visual|avatar|portrait|cover\s*art|banner)\b/);
+  const imageLead=has(/^\s*(?:please\s+)?(?:generate|create|make|draw|paint|render)\s+(?:me\s+)?(?:an?\s+)?(?:image|picture|photo|illustration|artwork|wallpaper|logo|poster|thumbnail|avatar|portrait|banner)\b/);
+  const designRequest=has(/\b(?:design|create|make)\b.{0,45}\b(?:logo|poster|thumbnail|wallpaper|avatar|portrait|cover|banner|icon|album art)\b/);
+  if(!asksHowTo && ((imageAction&&imageNoun)||imageLead||designRequest)) return {type:'image',label:'Image generation',strategy:'Generate the requested visual using the image-generation tool. Do not replace a requested image with a text-only description.',format:'visual'};
+  if(asksHowTo) return {type:'explanation',label:'How-to explanation',strategy:'Give clear, actionable instructions for learning or doing the requested task; do not generate an image unless the user explicitly asks for the finished visual.',format:'steps'};
+  if(has(/\b(debug|fix|refactor|implement|write|build|code|javascript|python|html|css|sql|api|function|stack trace|compiler|programming|bug|exception|syntax error)\b/)) return {type:'coding',label:'Coding',strategy:'Give the working solution first. Use correctly labelled fenced code, explain the root cause and important changes, preserve existing interfaces and constraints, and never claim to have run code unless it was actually tested.',format:'code'};
+  if(has(/\b(compare|comparison|versus|\bvs\.?\b|difference between|pros and cons|which is better|rank these)\b/)) return {type:'comparison',label:'Comparison',strategy:'Compare options using the same meaningful criteria. Use a compact table when useful, then give a clear recommendation and explain when the answer changes.',format:'table'};
+  if(has(/\b(calculate|solve|equation|differentiate|integrate|simplify|prove|derive|numerical|find the value|evaluate|factorise|factorize|matrix|determinant|probability)\b/) || /(?:\$\$|\\\(|\\\[)/.test(t)) return {type:'math',label:'Problem solving',strategy:'Solve step by step. State the relevant formula, substitute values carefully, show intermediate steps, include units where relevant, and check the result when possible. Use valid LaTeX delimiters for equations.',format:'math'};
+  if(has(/\b(analy[sz]e|analysis|dataset|spreadsheet|csv|statistics|trend|chart|graph|plot|calculate the average|data set)\b/)) return {type:'data',label:'Data analysis',strategy:'Use only data actually provided or available. Explain method and key findings, distinguish observations from assumptions, and create charts only when the data supports them.',format:'data'};
+  if(has(/\b(translate|translation|translate this|meaning in english|meaning in hindi)\b/)) return {type:'translation',label:'Translation',strategy:'Translate the supplied text faithfully, preserving tone, intent, names and formatting. Do not add explanations unless requested.',format:'text'};
+  if(has(/\b(summarize|summarise|summary|tl;dr|key takeaways|in short|shorten this)\b/)) return {type:'summary',label:'Summary',strategy:'Capture the central points accurately, prioritise important details, and match the requested length. Do not introduce facts absent from the source.',format:'structured'};
+  if(has(/\b(plan|roadmap|schedule|step-by-step plan|strategy|checklist|organize|organise|itinerary)\b/)) return {type:'planning',label:'Planning',strategy:'Turn the goal into actionable ordered steps. Include dependencies, priorities and realistic checks; call out missing assumptions rather than inventing constraints.',format:'steps'};
+  if(has(/\b(explain|teach|what is|what are|why does|how does|meaning of|notes|study|chapter|concept|define|elaborate)\b/)) return {type:'explanation',label:'Explanation',strategy:'Start with a direct answer, build from simple to advanced, add a concrete example and common mistake only when useful, and adapt to the user’s apparent level.',format:'structured'};
+  if(has(/\b(draft|rewrite|polish|compose|caption|email|story|poem|script|bio|post|write me|write a)\b/)) return {type:'writing',label:'Writing',strategy:'Produce the requested artifact directly in the requested tone and format. Keep preamble short and preserve the user’s intended meaning.',format:'artifact'};
+  if(has(/\b(latest|today|current|recent|this week|right now|news|source|citation|research|as of now)\b/)) return {type:'current-info',label:'Current information',strategy:'Be explicit about freshness limits. Do not claim live browsing, citations or verification unless an actual search tool is available and used; provide grounded context and state uncertainty.',format:'structured'};
+  if(raw.length<45 && has(/\b(why|how|what about|and|also|continue|more|shorter|simpler|in hinglish|in hindi|in english|example|explain that|elaborate)\b/)) return {type:'follow-up',label:'Contextual follow-up',strategy:'Interpret this as a follow-up to the conversation when context supports that. Resolve references using prior messages, answer the specific follow-up directly, and do not restart the whole topic unnecessarily.',format:'conversation'};
+  return {type:'general',label:'General answer',strategy:'Answer the actual question directly. Choose formatting based on the information: prose for conversation, lists for procedures, tables for genuine comparisons, and code/math blocks only when useful.',format:'adaptive'};
+}
+function isYouTubeSearchRequest(text){return analyzePromptIntent(text).type==='youtube-search';}
+function extractYouTubeQuery(text){return String(text||'').replace(/^\s*(?:please\s+)?(?:find|search(?:\s+for)?|show(?:\s+me)?|suggest|recommend|give\s+me|send\s+me|provide)\s+(?:some\s+)?(?:good\s+|best\s+|top\s+)?(?:youtube\s+)?(?:videos?\s+(?:about|on|for|to\s+learn)\s+|(?:youtube\s+)?(?:videos?|tutorials?|lectures?|songs?|music|reviews?|trailers?)\s+(?:about|on|for)\s+)?/i,'').replace(/\b(on|from)\s+youtube\b/ig,'').replace(/\byoutube\s+videos?\b/ig,'').trim() || String(text||'').trim();}
+function normalizeYouTubeResults(data){
+  const arr=Array.isArray(data)?data:(Array.isArray(data?.items)?data.items:(Array.isArray(data?.results)?data.results:[]));
+  return arr.map(v=>{
+    const id=typeof v?.videoId==='string'?v.videoId:(typeof v?.id==='string'?v.id:(v?.id?.videoId||v?.video?.videoId||''));
+    const title=String(v?.title||v?.name||v?.snippet?.title||'').trim();
+    const thumb=String(v?.thumbnail||v?.thumbnailUrl||v?.thumbnails?.[0]?.url||v?.snippet?.thumbnails?.high?.url||v?.snippet?.thumbnails?.medium?.url||'');
+    const channel=String(v?.uploaderName||v?.uploader||v?.author||v?.channelTitle||v?.snippet?.channelTitle||'YouTube');
+    const duration=String(v?.duration||'');
+    return {id,title,thumb:thumb|| (id?`https://i.ytimg.com/vi/${encodeURIComponent(id)}/hqdefault.jpg`:''),channel,duration};
+  }).filter(v=>/^[\w-]{11}$/.test(v.id)&&v.title).slice(0,8);
+}
+async function searchYouTubeVideos(query){
+  const q=String(query||'').trim(); if(!q) throw new Error('Tell me the topic, title, or creator to search on YouTube.');
+  const encoded=encodeURIComponent(q);
+  const providers=[
+    `https://pipedapi.adminforge.de/search?q=${encoded}&filter=videos`,
+    `https://pipedapi.kavin.rocks/search?q=${encoded}&filter=videos`,
+    `https://inv.nadeko.net/api/v1/search?q=${encoded}&type=video`,
+    `https://invidious.nerdvpn.de/api/v1/search?q=${encoded}&type=video`
+  ];
+  let lastError=null;
+  for(const url of providers){
+    try{
+      const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),8500);
+      const response=await fetch(url,{headers:{'Accept':'application/json'},signal:controller.signal,mode:'cors'}); clearTimeout(timeout);
+      if(!response.ok) throw new Error('Search provider returned HTTP '+response.status);
+      const data=await response.json(); const results=normalizeYouTubeResults(data);
+      if(results.length) return results;
+      throw new Error('No video results returned by provider');
+    }catch(e){lastError=e;}
+  }
+  throw new Error('YouTube search providers could not be reached from this browser. Try again later, or configure a YouTube Data API key in a future build. '+(lastError?.message||''));
+}
+function youtubeCardExplanation(item,index){
+  const t=(item.title+' '+item.channel).toLowerCase();
+  if(/beginner|complete guide|getting started|for beginners|basics/.test(t)) return {label:'Best for beginners',description:'A good starting point for understanding the basics before moving to more advanced gameplay.'};
+  if(/control|keyboard|keybind|controller|button/.test(t)) return {label:'Controls explained',description:'Useful for learning movement, driving, aiming, and the main controls for your platform.'};
+  if(/story mode|mission|walkthrough|chapter|gameplay/.test(t)) return {label:'Gameplay walkthrough',description:'Follow along with gameplay to understand missions, objectives, and what to do next.'};
+  if(/online|gta online|multiplayer/.test(t)) return {label:'GTA Online',description:'Focused on online play, activities, and getting comfortable with GTA Online.'};
+  if(/tips|tricks|secret|money|best way/.test(t)) return {label:'Tips & tricks',description:'Practical tips that can help you learn faster and avoid common beginner mistakes.'};
+  return {label:index===0?'Recommended starting point':'Alternative explanation',description:index===0?'Start here for a guided explanation related to your request. I’ve placed this first because its title appears to match your topic.':'Try this as another explanation or teaching style if the first video does not suit you.'};
+}
+function renderYouTubeCards(container,results){
+  container.innerHTML=''; const list=document.createElement('div');list.className='youtube-results';
+  results.forEach((item,index)=>{
+    const card=document.createElement('section');card.className='youtube-card';
+    const thumbWrap=document.createElement('div');thumbWrap.className='youtube-thumb-wrap';thumbWrap.title='Play video in chat';
+    const img=document.createElement('img');img.className='youtube-thumb';img.loading='lazy';img.alt='Thumbnail: '+item.title;img.src=item.thumb;img.onerror=()=>{if(item.id)img.src=`https://i.ytimg.com/vi/${encodeURIComponent(item.id)}/mqdefault.jpg`;};
+    const play=document.createElement('button');play.className='youtube-play';play.type='button';play.setAttribute('aria-label','Play '+item.title);play.textContent='▶';thumbWrap.append(img,play);
+    const title=document.createElement('div');title.className='youtube-card-title';title.textContent=(index+1)+'. '+item.title;
+    const meta=document.createElement('div');meta.className='youtube-meta';meta.textContent='Creator: '+item.channel+(item.duration?' · '+item.duration:'');
+    const explanation=youtubeCardExplanation(item,index);const label=document.createElement('div');label.className='youtube-fit-label';label.textContent=explanation.label;
+    const description=document.createElement('p');description.className='youtube-card-description';description.textContent=explanation.description;
+    const details=document.createElement('div');details.className='youtube-card-details';details.append(label,title,description,meta);
+    const actions=document.createElement('div');actions.className='youtube-card-actions';
+    const playBtn=document.createElement('button');playBtn.type='button';playBtn.textContent='▶ Play here';
+    const openBtn=document.createElement('button');openBtn.type='button';openBtn.textContent='Watch on YouTube ↗';
+    const playInline=()=>{const frame=document.createElement('iframe');frame.className='youtube-player';frame.title=item.title;frame.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(item.id)+'?autoplay=1&rel=0';frame.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';frame.allowFullscreen=true;thumbWrap.replaceWith(frame);};
+    thumbWrap.addEventListener('click',playInline);playBtn.addEventListener('click',playInline);openBtn.addEventListener('click',()=>GenYouTubeOpen(item.id));actions.append(playBtn,openBtn);card.append(thumbWrap,details,actions);list.appendChild(card);
+  });
+  container.appendChild(list);
+}
+function GenYouTubeOpen(id){const url='https://www.youtube.com/watch?v='+encodeURIComponent(id);if(typeof GenUI!=='undefined'&&GenUI.openUrl)GenUI.openUrl(url);else window.open(url,'_blank','noopener,noreferrer');}
+function isImageGenerationRequest(text){return analyzePromptIntent(text).type==='image';}
+function isVideoGenerationRequest(text){return analyzePromptIntent(text).type==='video';}
+function extractVideoPrompt(text){return String(text||'').replace(/^\s*(?:please\s+)?(?:generate|create|make|produce|render)\s+(?:me\s+)?(?:a\s+)?(?:video|vedio|clip|animation)\s*(?:of|about|showing|depicting)?\s*[:：-]?\s*/i,'').replace(/^generate\s+(?:a\s+)?video\s*[:：-]?\s*/i,'').trim()||String(text||'').trim();}
+function buildHyperSystemPrompt(userText,intent){
+  const settings=(typeof larkSettings!=='undefined'&&larkSettings)?larkSettings:{};
+  const personality=settings.personality||'Friendly';
+  const length=settings.responseLength||'Balanced';
+  const lang=settings.responseLanguage||'Auto';
+  const custom=String(settings.customInstructions||'').trim().slice(0,3000);
+  const langRule=lang==='Auto'?'Reply in the language and style the user uses; mirror Hinglish naturally when appropriate.':`Prefer ${lang} unless the user explicitly requests another language.`;
+  const lengthRule=length==='Concise'?'Be concise but complete.':length==='Detailed'?'Be thorough, structured and precise without filler.':'Use enough detail to solve the request without unnecessary repetition.';
+  const personalityRule=personality==='Professional'?'Use a clear, professional tone.':personality==='Neutral'?'Use a neutral, straightforward tone.':personality==='Concise'?'Be direct and compact.':'Be friendly, clear, and natural.';
+  const formatting=String.raw`RENDERING CONTRACT: Write valid Markdown, not raw HTML and not a JSON wrapper unless explicitly requested. Use meaningful headings sparingly, short paragraphs, proper nested lists, tables only for real comparisons/data, and fenced code blocks with language labels. For mathematics, use KaTeX-compatible \( ... \) inline and \[ ... \] display delimiters; put each display equation on its own lines. Never put ordinary prose inside code fences. Do not use a table when a short list is clearer.`;
+  const quality='QUALITY CONTRACT: Answer the exact request first. Be specific, logically ordered and useful. Explain assumptions when they matter. Avoid repetitive introductions, fake certainty, fake citations, fake tool calls, and claims that code or services were tested when they were not. If the request depends on live information and no real search tool is available, say so plainly.';
+  const context='CONVERSATION CONTRACT: Treat earlier user and assistant messages as context. For follow-ups, resolve pronouns and references from the recent conversation. Follow explicit user constraints and corrections. Ask a question only when a missing detail materially prevents a useful answer; otherwise make a reasonable, transparent assumption.';
+  return [
+    'You are LARK Hyper Intelligence 2.1, a capable general-purpose AI assistant. Solve the user’s actual request rather than merely describing what you could do. Ask one concise, clickable clarification question only when a material ambiguity prevents a tailored answer; do not interrogate users about details that can be reasonably assumed. Respect answers already given in the conversation.',
+    'INTENT CLASSIFICATION: '+intent.label+' ('+intent.type+'). RESPONSE STRATEGY: '+intent.strategy,
+    'USER LANGUAGE AND STYLE: '+langRule+' '+lengthRule+' '+personalityRule,
+    formatting,quality,context,
+    custom?'USER CUSTOM INSTRUCTIONS: '+custom:''
+  ].filter(Boolean).join('\n\n');
+}
+function extractImagePrompt(text){
+  return String(text||'').replace(/^\s*(please\s+)?(generate|create|make|draw|design|render)\s+(me\s+)?(an?\s+)?(image|picture|photo|illustration|artwork|wallpaper|logo|poster|thumbnail)?\s*(of|for|showing|depicting)?\s*[:：-]?\s*/i,'').replace(/^create an image\s*[:：-]?\s*/i,'').trim() || String(text||'').trim();
+}
+
+let lastGeneratedImage=null;
+const imageLightbox=document.getElementById('imageLightbox');
+const lightboxImage=document.getElementById('lightboxImage');
+const imageLightboxStatus=document.getElementById('imageLightboxStatus');
+const imageEditDialog=document.getElementById('imageEditDialog');
+function openImageLightbox(img){
+  if(!img || !img.src) return;
+  if(!lastGeneratedImage || lastGeneratedImage.img!==img) lastGeneratedImage={src:img.src,prompt:img.dataset.prompt||'',img};
+  lastGeneratedImage.src=img.src;lastGeneratedImage.img=img;
+  lightboxImage.src=img.src;imageLightboxStatus.textContent='Tap Edit to describe changes, or Regenerate to try again with the original prompt.';
+  imageLightbox.classList.add('open');document.body.style.overflow='hidden';
+}
+function closeImageLightbox(){imageLightbox.classList.remove('open');imageEditDialog.classList.remove('open');document.body.style.overflow='';}
+document.getElementById('closeImageLightbox').addEventListener('click',closeImageLightbox);
+imageLightbox.addEventListener('click',e=>{if(e.target===imageLightbox)closeImageLightbox();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeImageLightbox();}});
+document.getElementById('saveGeneratedImage').addEventListener('click',async()=>{
+  if(!lastGeneratedImage?.src)return;
+  const btn=document.getElementById('saveGeneratedImage');btn.disabled=true;imageLightboxStatus.textContent='Preparing image for saving…';
+  try{
+    const response=await fetch(lastGeneratedImage.src,{mode:'cors'});
+    if(!response.ok)throw new Error('Could not fetch image');
+    const blob=await response.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='lark-generated-image-'+Date.now()+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);imageLightboxStatus.textContent='Download started.';
+  }catch(e){
+    // Fallback for providers that return a cross-origin image URL that cannot be fetched.
+    const a=document.createElement('a');a.href=lastGeneratedImage.src;a.download='lark-generated-image-'+Date.now()+'.png';a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();imageLightboxStatus.textContent='Opened the image in a new tab if direct download is blocked. Use your browser menu to save it.';
+  }finally{btn.disabled=false;}
+});
+document.getElementById('editGeneratedImage').addEventListener('click',()=>{document.getElementById('imageEditPrompt').value='';imageEditDialog.classList.add('open');});
+document.getElementById('cancelImageEdit').addEventListener('click',()=>imageEditDialog.classList.remove('open'));
+async function replaceGeneratedImage(promptText,mode){
+  if(!lastGeneratedImage?.img)return;
+  const buttons=['saveGeneratedImage','editGeneratedImage','regenerateImage','closeImageLightbox'].map(id=>document.getElementById(id));buttons.forEach(b=>b.disabled=true);
+  imageLightboxStatus.textContent=mode==='edit'?'Generating your edited version…':'Regenerating image…';
+  try{
+    const result=await puter.ai.txt2img(promptText,{model:'google/gemini-nano-banana-2.1'});
+    if(!(result instanceof HTMLElement) || !result.src)throw new Error('Puter returned an unsupported image result.');
+    const old=lastGeneratedImage.img;const img=result;img.classList.add('generated-image');img.alt='AI-generated image';img.dataset.prompt=promptText;
+    img.style.cursor='zoom-in';img.addEventListener('click',()=>openImageLightbox(img));
+    old.replaceWith(img);lastGeneratedImage={src:img.src,prompt:promptText,img};lightboxImage.src=img.src;imageLightboxStatus.textContent=mode==='edit'?'Edited image generated.':'New image generated.';imageEditDialog.classList.remove('open');
+  }catch(e){imageLightboxStatus.textContent='Could not generate image: '+(e?.message||String(e));}
+  finally{buttons.forEach(b=>b.disabled=false);}
+}
+document.getElementById('applyImageEdit').addEventListener('click',()=>{const edit=document.getElementById('imageEditPrompt').value.trim();if(!edit){document.getElementById('imageEditPrompt').focus();return;}const base=lastGeneratedImage?.prompt||'Create a polished image';replaceGeneratedImage(base+'. Apply these requested changes: '+edit+'. Produce a complete revised image.', 'edit');});
+document.getElementById('regenerateImage').addEventListener('click',()=>{if(lastGeneratedImage?.prompt)replaceGeneratedImage(lastGeneratedImage.prompt,'regenerate');else imageLightboxStatus.textContent='Original prompt is unavailable for this image.';});
+async function sendMessage(){
+  const text=promptBox.value.trim();
+  if(!text || requestInProgress || chatLocked) return;
+  if(!window.puter || !puter.ai){
+    notify('Puter.js is not ready. Check your internet connection and reload.');
+    return;
+  }
+  const imageIntent=isImageGenerationRequest(text);
+  const videoIntent=isVideoGenerationRequest(text);
+  const youtubeIntent=isYouTubeSearchRequest(text);
+  if(imageIntent && typeof puter.ai.txt2img!=='function'){
+    notify('Image generation is unavailable: Puter.js txt2img did not load.');
+    return;
+  }
+  if(videoIntent && typeof puter.ai.txt2vid!=='function'){notify('Video generation is unavailable: Puter.js txt2vid did not load.');return;}
+  if(!imageIntent && !videoIntent && !youtubeIntent && typeof puter.ai.chat!=='function'){
+    notify('Puter.js chat is not ready. Check your internet connection and reload.');
+    return;
+  }
+  welcome.hidden=true;
+  messages.hidden=false;
+  // The welcome cards must disappear completely once the first prompt is sent.
+  welcome.style.display="none";
+  if(!activeChatId){
+    activeTitle=text.length>30?text.slice(0,30)+'…':text;
+    activeChatId='chat_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    const chat={id:activeChatId,title:activeTitle,messages:[],model:currentModel,pinned:false,archived:false,updatedAt:Date.now()};savedChats.push(chat);
+    renderHistory();currentHistoryItem=[...history.children].find(x=>x.dataset.chatId===activeChatId)||null;chatCount=savedChats.length;
+  }
+  addMessage(text,'user');
+  conversation.push({role:'user',content:text});
+  persistState();
+  const clarificationSpec=getClarificationSpec(text);
+  if(clarificationSpec){promptBox.value='';fit();showClarificationCard(clarificationSpec,text);return;}
+  promptBox.value='';
+  fit();
+  scroll.scrollTop=scroll.scrollHeight;
+  const waiting=document.createElement('article');
+  waiting.className='message';
+  waiting.innerHTML='<div class="avatar-mini assistant-mark">✳</div><div class="typing"><i></i><i></i><i></i></div>';
+  messages.appendChild(waiting);
+  scroll.scrollTop=scroll.scrollHeight;
+  requestInProgress=true;
+  sendBtn.disabled=true;
+  promptBox.disabled=true;
+  try{
+    if(youtubeIntent){
+      const query=extractYouTubeQuery(text);
+      const typing=waiting.querySelector('.typing');
+      if(typing)typing.outerHTML='<div class="image-gen-card" role="status" aria-live="polite"><div class="image-gen-heading"><div class="image-gen-orb" aria-hidden="true"></div><div class="image-gen-copy"><strong>Searching YouTube</strong><span>Finding existing videos and preparing thumbnails</span></div></div><div class="video-gen-preview"><div class="image-gen-progress"></div></div><div class="image-gen-caption"><span class="image-gen-dot"></span>Searching public video indexes…</div></div>';
+      const results=await searchYouTubeVideos(query);
+      waiting.remove();
+      const article=document.createElement('article');article.className='message';
+      const avatar=document.createElement('div');avatar.className='avatar-mini assistant-mark';avatar.textContent='✳';
+      const body=document.createElement('div');body.className='message-body';
+      const label=document.createElement('div');label.className='message-text';label.textContent=`Here are a few YouTube tutorials for “${query}”. I’ve added a short guide to what each result may help with, so you can choose instead of browsing a video library.`;
+      const cards=document.createElement('div');cards.className='message-text';renderYouTubeCards(cards,results);body.append(label,cards);article.append(avatar,body);messages.appendChild(article);
+      conversation.push({role:'assistant',content:'[[LARK_YOUTUBE_RESULTS]]'+JSON.stringify(results)});persistState();
+    }else if(videoIntent){
+      waiting.querySelector('.typing').outerHTML='<div class="image-gen-card" role="status" aria-live="polite"><div class="image-gen-heading"><div class="image-gen-orb" aria-hidden="true"></div><div class="image-gen-copy"><strong>Creating your video</strong><span>Puter.js · Gemini Omni Flash</span></div></div><div class="video-gen-preview"><div class="image-gen-progress"></div></div><div class="image-gen-caption"><span class="image-gen-dot"></span>Building scenes and rendering motion… this may take a little while.</div></div>';
+      const video=await puter.ai.txt2vid(extractVideoPrompt(text),{model:'google/gemini-omni-1.1-flash'});
+      waiting.remove();
+      const article=document.createElement('article');article.className='message';
+      const avatar=document.createElement('div');avatar.className='avatar-mini assistant-mark';avatar.textContent='✳';
+      const body=document.createElement('div');body.className='message-body';
+      const label=document.createElement('div');label.className='message-text';label.textContent='Here is your generated video.';body.appendChild(label);
+      if(video instanceof HTMLElement && (video.tagName==='VIDEO' || video.querySelector('video'))){const media=video.tagName==='VIDEO'?video:video.querySelector('video');media.classList.add('generated-video');media.controls=true;media.playsInline=true;media.preload='metadata';body.appendChild(media);}
+      else if(typeof video==='string'){const media=document.createElement('video');media.className='generated-video';media.controls=true;media.playsInline=true;media.preload='metadata';media.src=video;body.appendChild(media);}
+      else if(video && typeof video.url==='string'){const media=document.createElement('video');media.className='generated-video';media.controls=true;media.playsInline=true;media.preload='metadata';media.src=video.url;body.appendChild(media);}
+      else {throw new Error('Puter returned an unsupported video result.');}
+      article.append(avatar,body);messages.appendChild(article);conversation.push({role:'assistant',content:'Generated a video using google/gemini-omni-1.1-flash for prompt: '+extractVideoPrompt(text)});persistState();
+    }else if(imageIntent){
+      waiting.querySelector('.typing').outerHTML='<div class="image-gen-card" role="status" aria-live="polite"><div class="image-gen-heading"><div class="image-gen-orb" aria-hidden="true"></div><div class="image-gen-copy"><strong>Creating your image</strong><span>Nano Banana 2.1 · LARK image studio</span></div></div><div class="image-gen-preview" aria-hidden="true"><div class="image-gen-progress"></div></div><div class="image-gen-caption"><span class="image-gen-dot"></span>Dreaming up details and rendering your image…</div></div>';
+      const imageElement=await puter.ai.txt2img(extractImagePrompt(text),{model:'google/gemini-nano-banana-2.1'});
+      waiting.remove();
+      const article=document.createElement('article');article.className='message';
+      const avatar=document.createElement('div');avatar.className='avatar-mini assistant-mark';avatar.textContent='✳';
+      const body=document.createElement('div');body.className='message-body';
+      const label=document.createElement('div');label.className='message-text';label.textContent='Here is your generated image.';body.appendChild(label);
+      if(imageElement instanceof HTMLElement && imageElement.src){const frame=document.createElement('div');frame.className='generated-image-frame';imageElement.classList.add('generated-image');imageElement.alt='AI-generated image';imageElement.style.cursor='zoom-in';imageElement.title='Tap to expand image and see options';const originalPrompt=extractImagePrompt(text);imageElement.dataset.prompt=originalPrompt;imageElement.addEventListener('click',()=>{lastGeneratedImage={src:imageElement.src,prompt:originalPrompt,img:imageElement};openImageLightbox(imageElement);});lastGeneratedImage={src:imageElement.src,prompt:originalPrompt,img:imageElement};frame.appendChild(imageElement);body.appendChild(frame)}else{throw new Error('Puter returned an unsupported image result.');}
+      article.append(avatar,body);messages.appendChild(article);conversation.push({role:'assistant',content:'Generated an image using google/gemini-nano-banana-2.1 for prompt: '+extractImagePrompt(text)});persistState();
+    }else{
+      const intent=analyzePromptIntent(text);
+      const typingEl=waiting.querySelector('.typing');
+      if(typingEl) typingEl.setAttribute('aria-label','Preparing a '+intent.label.toLowerCase()+' response');
+      const model=MODEL_IDS[currentModel] || MODEL_IDS['Apex 3.1'];
+      const systemMessage={role:'system',content:buildHyperSystemPrompt(text,intent)};
+      // Keep stored conversation clean; attach the current strategy only to this request.
+      const contextWindow=conversation.slice(-24);
+      let contextChars=0;
+      const boundedContext=[];
+      for(let i=contextWindow.length-1;i>=0;i--){const item=contextWindow[i];const content=String(item.content??'');if(boundedContext.length && contextChars+content.length>48000)break;boundedContext.unshift(item);contextChars+=content.length;}
+      const requestMessages=[systemMessage,...boundedContext];
+      const response=await puter.ai.chat(requestMessages, {model});
+      const answer=extractPuterText(response).trim() || 'The model returned an empty response.';
+      conversation.push({role:'assistant',content:answer});
+      waiting.remove();
+      addMessage(answer,'assistant');persistState();
+    }
+  }catch(error){
+    waiting.remove();
+    const errorText=(imageIntent?'Image generation failed. ':youtubeIntent?'YouTube search failed. ':'Sorry, the request to Puter.js failed. ')+'\n\n'+(error?.message||String(error))+'\n\n'+(imageIntent?'Check Puter.js access and Nano Banana 2.1 model availability, then try again.':youtubeIntent?'Check your internet connection. Public search providers may be unavailable or block browser requests.':'Check your internet connection, model ID, and Puter.js permissions, then try again.');
+    addMessage(errorText,'assistant');
+    conversation.pop();persistState();
+  }finally{
+    requestInProgress=false;
+    promptBox.disabled=false;
+    fit();
+    promptBox.focus();
+    scroll.scrollTop=scroll.scrollHeight;persistState();
+  }
+}
+sendBtn.addEventListener('click',sendMessage);
+const addChatPanel=$('#addChatPanel');
+function toggleAddChat(force){const open=typeof force==='boolean'?force:!addChatPanel.classList.contains('open');addChatPanel.classList.toggle('open',open);addChatPanel.setAttribute('aria-hidden',String(!open));$('#attachBtn').setAttribute('aria-expanded',String(open));}
+$('#attachBtn').addEventListener('click',e=>{e.stopPropagation();toggleAddChat()});
+$('#closeAddChat').addEventListener('click',()=>toggleAddChat(false));
+$('#cameraAction').addEventListener('click',()=>{toggleAddChat(false);$('#cameraPicker').click()});
+$('#photosAction').addEventListener('click',()=>{toggleAddChat(false);$('#photoPicker').click()});
+$('#filesAction').addEventListener('click',()=>{toggleAddChat(false);$('#filePicker').click()});
+function handlePickedFiles(input){const files=[...(input.files||[])];if(!files.length)return;const names=files.map(f=>f.name).join(', ');notify('Selected: '+names);const note='[Files selected: '+names+']. File content is not yet attached to the AI request.';conversation.push({role:'user',content:note});persistState();input.value=''}
+$('#filePicker').addEventListener('change',e=>handlePickedFiles(e.target));$('#photoPicker').addEventListener('change',e=>handlePickedFiles(e.target));$('#cameraPicker').addEventListener('change',e=>handlePickedFiles(e.target));
+let webSearchEnabled=false, memoryEnabled=true;try{webSearchEnabled=localStorage.getItem('lark_web_search_enabled')==='true';memoryEnabled=localStorage.getItem('lark_memory_enabled')!=='false'}catch(storageReadError){console.warn('LARK: browser storage unavailable; using defaults',storageReadError)}
+function paintToggle(buttonId,switchId,on){$('#'+buttonId).setAttribute('aria-pressed',String(on));$('#'+switchId).classList.toggle('on',on)}
+paintToggle('webSearchToggle','webSearchSwitch',webSearchEnabled);paintToggle('memoryToggle','memorySwitch',memoryEnabled);
+$('#webSearchToggle').addEventListener('click',()=>{webSearchEnabled=!webSearchEnabled;localStorage.setItem('lark_web_search_enabled',String(webSearchEnabled));paintToggle('webSearchToggle','webSearchSwitch',webSearchEnabled);notify(webSearchEnabled?'Web search enabled (provider integration still required)':'Web search disabled')});
+$('#memoryToggle').addEventListener('click',()=>{memoryEnabled=!memoryEnabled;localStorage.setItem('lark_memory_enabled',String(memoryEnabled));paintToggle('memoryToggle','memorySwitch',memoryEnabled);notify(memoryEnabled?'Memory preference enabled':'Memory preference disabled')});
+$('#projectAction').addEventListener('click',()=>{toggleAddChat(false);notify('Projects are coming soon')});
+$('#connectorsAction').addEventListener('click',()=>{toggleAddChat(false);notify('Connectors are coming soon')});
+document.addEventListener('click',e=>{if(!e.target.closest('#addChatPanel')&&!e.target.closest('#attachBtn'))toggleAddChat(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')toggleAddChat(false)});
+const toolsMenu=$('#toolsMenu');
+function toggleToolsMenu(force){const open=typeof force==='boolean'?force:!toolsMenu.classList.contains('open');toolsMenu.classList.toggle('open',open);toolsMenu.setAttribute('aria-hidden',String(!open));$('#toolsBtn').setAttribute('aria-expanded',String(open));}
+$('#toolsBtn').addEventListener('click',e=>{e.stopPropagation();toggleToolsMenu()});
+$('#createImageTool').addEventListener('click',()=>{toggleToolsMenu(false);promptBox.value=promptBox.value.trim()?promptBox.value.trim()+'\nCreate an image: ':'Create an image: ';fit();promptBox.focus();notify('Describe the image you want, then send. LARK will generate it with Nano Banana 2.1.')});
+$('#generateVideoTool').addEventListener('click',()=>{toggleToolsMenu(false);promptBox.value=promptBox.value.trim()?promptBox.value.trim()+'\nGenerate a video: ':'Generate a video: ';fit();promptBox.focus();notify('Describe the video you want, then send. LARK will generate it with Puter.js.')});
+document.addEventListener('click',e=>{if(!e.target.closest('#toolsMenu')&&!e.target.closest('#toolsBtn'))toggleToolsMenu(false)});
+$('#voiceBtn').addEventListener('click',()=>notify('Voice mode is not connected in this demo'));
+$('#chatMenuBtn').addEventListener('click',()=>$('#chatOptionsMenu').classList.toggle('open'));
+document.addEventListener('click',e=>{if(!e.target.closest('#chatMenuBtn')&&!e.target.closest('#chatOptionsMenu'))$('#chatOptionsMenu').classList.remove('open')});
+$('#chatOptionsMenu').addEventListener('click',async e=>{const btn=e.target.closest('button[data-action]');if(!btn)return;const action=btn.dataset.action;$('#chatOptionsMenu').classList.remove('open');
+ if(action==='share'){const payload={title:'LARK chat',text:messages.innerText||'Chat with LARK',url:location.href};try{if(navigator.share)await navigator.share(payload);else{await navigator.clipboard.writeText(payload.url);notify('Page link copied to clipboard')}}catch(err){if(err.name!=='AbortError')notify('Sharing is not available in this browser')}}
+ if(action==='pin'){if(!activeChatId){notify('Send a message first to create a chat');return}const chat=savedChats.find(c=>c.id===activeChatId);if(chat){chat.pinned=!chat.pinned;chat.updatedAt=Date.now();renderHistory();persistState();btn.querySelector('span').textContent=chat.pinned?'Unpin chat':'Pin chat';notify(chat.pinned?'Chat pinned':'Chat unpinned')}}
+ if(action==='lock'){chatLocked=!chatLocked;promptBox.disabled=chatLocked;sendBtn.disabled=chatLocked||!promptBox.value.trim();let banner=$('#lockBanner');if(!banner){banner=document.createElement('div');banner.id='lockBanner';banner.className='lock-banner';$('.composer-wrap').prepend(banner)}banner.textContent=chatLocked?'🔒 Chat locked. Choose “Lock chats” again to unlock and continue.':'Chat unlocked.';banner.classList.add('show');btn.querySelector('span').textContent=chatLocked?'Unlock chats':'Lock chats';notify(chatLocked?'Chat input locked':'Chat unlocked')}
+ if(action==='files'){document.querySelector('#filePicker').click()}
+ if(action==='find'){const q=prompt('Find text in this chat:');if(q){document.querySelectorAll('.message').forEach(m=>m.classList.remove('search-hit'));const hits=[...document.querySelectorAll('.message')].filter(m=>m.innerText.toLowerCase().includes(q.toLowerCase()));hits.forEach(m=>m.classList.add('search-hit'));if(hits[0])hits[0].scrollIntoView({behavior:'smooth',block:'center'});notify(hits.length?`Found ${hits.length} matching message(s)`:'No matches in this chat')}}
+ if(action==='home'){notify('To add LARK to your home screen, open the browser menu and choose “Add to Home screen” or “Install app”.')}
+ if(action==='archive'){if(!activeChatId){notify('There is no active chat to archive');return}const chat=savedChats.find(c=>c.id===activeChatId);if(chat){chat.archived=true;chat.updatedAt=Date.now();persistState();renderHistory();notify('Chat archived on this browser');newChat()}}
+ if(action==='delete'){if(!confirm('Delete this chat from this browser?'))return;if(activeChatId)savedChats=savedChats.filter(c=>c.id!==activeChatId);activeChatId=null;conversation=[];messages.innerHTML='';messages.hidden=true;welcome.hidden=false;welcome.style.display='';activeTitle='New chat';currentHistoryItem=null;persistState();renderHistory();notify('Chat deleted from this browser')}
+});
+$('#searchBtn').addEventListener('click',()=>{const q=prompt('Search chat titles:');if(q){const found=[...history.children].filter(x=>x.textContent.toLowerCase().includes(q.toLowerCase()));notify(found.length?`Found ${found.length} chat(s)`:'No matching chats')}})
+$('#libraryBtn').addEventListener('click',()=>notify('LARK library is not connected yet'));
+['imagesBtn','projectsBtn','remoteBtn','scheduledBtn','pluginsBtn'].forEach(id=>$('#'+id)?.addEventListener('click',()=>notify(({imagesBtn:'Images is coming soon',projectsBtn:'Projects is coming soon',remoteBtn:'Remote is coming soon',scheduledBtn:'Scheduled tasks are coming soon',pluginsBtn:'Plugins are coming soon'})[id])));
+// Settings panel is wired above; do not replace it with the old coming-soon handler.
+restoreState();
+</script>
+<script>
+/* Settings implementation: all preferences autosave locally. */
+const SETTINGS_KEY='lark_settings_v1';
+const settingsDefs=[
+ {id:'general',name:'General',icon:'◉',desc:'Language and conversation behaviour',groups:[['Language',{key:'uiLanguage',label:'Interface language',type:'select',options:['Auto','English','Hinglish','Hindi'],desc:'Controls LARK interface labels where translations are available.'},{key:'responseLanguage',label:'AI response language',type:'select',options:['Auto','English','Hinglish','Hindi'],desc:'Adds a language preference to future AI requests.'},{key:'enterToSend',label:'Enter to send',type:'toggle',desc:'Enter sends; Shift + Enter inserts a new line.'},{key:'autoScroll',label:'Auto-scroll',type:'toggle',desc:'Follow the latest message while the conversation updates.'},{key:'confirmDelete',label:'Confirm before deleting',type:'toggle',desc:'Ask before deleting a chat or clearing history.'},{key:'markdown',label:'Formatted responses',type:'toggle',desc:'Render Markdown, code, tables and equations when supported.'}]]},
+ {id:'models',name:'Models & AI',icon:'✦',desc:'Models, response style and request handling',groups:[['Model preferences',{key:'rememberLastModel',label:'Remember last selected model',type:'toggle',desc:'New chats continue with the last model you selected.'},{key:'responseLength',label:'Response length',type:'select',options:['Short','Balanced','Detailed'],desc:'Preference for future requests.'},{key:'reasoning',label:'Reasoning preference',type:'select',options:['Standard','Extended'],desc:'A preference only; actual support depends on the selected provider/model.'},{key:'retryFailed',label:'Retry failed requests',type:'toggle',desc:'Offer retry when a request fails.'},{key:'fallback',label:'Automatic model fallback',type:'toggle',desc:'When enabled, may retry using the next configured model after a failure.'}]]},
+ {id:'memory',name:'Personalization & Memory',icon:'◎',desc:'Instructions and locally saved preferences',groups:[['Personalization',{key:'personality',label:'AI personality',type:'select',options:['Neutral','Friendly','Professional','Concise']},{key:'customInstructions',label:'Custom instructions',type:'textarea',desc:'Instructions to include in future requests. Do not store secrets here.'},{key:'memoryEnabled',label:'Use local memory preference',type:'toggle',desc:'Controls LARK’s memory preference; it does not create cloud sync.'}],['Memory management',{key:'memoryInfo',label:'Local memory',type:'info',text:'Memory is stored in this browser only. Memory OFF does not delete existing chat history.'},{key:'clearMemory',label:'Clear saved memory',type:'action',action:'clearMemory',danger:true}]]},
+ {id:'privacy',name:'Data & Privacy',icon:'⬡',desc:'Local storage, export and deletion',groups:[['Your data',{key:'saveChats',label:'Save chats on this device',type:'toggle',desc:'When off, LARK stops writing future chat updates to local history; existing saved data remains.'},{key:'exportJson',label:'Export chats',type:'action',action:'exportJson'},{key:'exportText',label:'Export as text',type:'action',action:'exportText'},{key:'clearHistory',label:'Clear all chat history',type:'action',action:'clearHistory',danger:true},{key:'storageInfo',label:'Storage and privacy',type:'info',text:'Chats and preferences are local to this browser origin. Clearing site data or changing devices can make them unavailable.'}],['Device security',{key:'deviceAuth',label:'Device authentication',type:'action',action:'deviceAuth',desc:'Use only if a real browser/device authentication API is available.'}]]},
+ {id:'tools',name:'Tools & Integrations',icon:'⌘',desc:'Tool availability and connection status',groups:[['Tools',{key:'webSearch',label:'Web search',type:'toggle',desc:'Preference only; a real search provider integration is still required.'},{key:'fileUploads',label:'File uploads',type:'toggle',desc:'Enable attachment selection UI. File contents are not necessarily sent to the AI yet.'},{key:'pdfCreator',label:'PDF creation',type:'toggle',desc:'Preference only; a PDF generation workflow must be implemented separately.'},{key:'dataAnalysis',label:'Data analysis',type:'toggle',desc:'Preference only; advanced analysis tools may not be connected.'},{key:'imageGeneration',label:'Image generation',type:'toggle',desc:'Preference only; requires a supported image provider.'},{key:'connectorInfo',label:'Connectors',type:'info',text:'No external connectors are currently confirmed as connected.'}]]},
+ {id:'appearance',name:'Appearance',icon:'◐',desc:'Personalize the interface',groups:[['Interface',{key:'theme',label:'Theme',type:'info',text:'Dark mode is fixed for LARK. Light mode is not available.'},{key:'fontSize',label:'Chat font size',type:'select',options:['Small','Medium','Large']},{key:'chatWidth',label:'Chat width',type:'select',options:['Compact','Comfortable','Wide']},{key:'messageSpacing',label:'Message spacing',type:'select',options:['Compact','Relaxed']},{key:'codeFontSize',label:'Code font size',type:'select',options:['Small','Medium','Large']},{key:'reducedMotion',label:'Reduce animations',type:'toggle',desc:'Reduce motion effects where supported.'},{key:'sidebarDefault',label:'Sidebar on startup',type:'select',options:['Expanded','Collapsed']}]]},
+ {id:'voice',name:'Voice',icon:'♫',desc:'Voice input and spoken responses',groups:[['Voice preferences',{key:'voiceInput',label:'Voice input',type:'toggle',desc:'Voice capture requires browser permission and a supported speech API.'},{key:'spokenReplies',label:'Spoken replies',type:'toggle',desc:'Speech is played only after you explicitly press a voice/talk control.'},{key:'voiceName',label:'Voice',type:'select',options:['System default','Voice 1','Voice 2']},{key:'speechSpeed',label:'Speech speed',type:'select',options:['Slow','Normal','Fast']},{key:'voiceLanguage',label:'Voice language',type:'select',options:['Auto','English','Hindi']},{key:'voiceInfo',label:'Voice availability',type:'info',text:'Voice service may depend on browser support and connected providers. Auto-play is disabled.'}]]},
+ {id:'app',name:'App & Shortcuts',icon:'▣',desc:'Installation, shortcuts and diagnostics',groups:[['App',{key:'installInfo',label:'Install LARK',type:'action',action:'installInfo',desc:'Installation availability depends on browser and PWA configuration.'},{key:'shortcuts',label:'Keyboard shortcuts',type:'info',text:'Enter: send (if enabled) · Shift+Enter: new line · Escape: close open panels.'},{key:'version',label:'Version',type:'info',text:'LARK Settings v1.0 · single-file web app.'},{key:'diagnostics',label:'Run diagnostics',type:'action',action:'diagnostics'},{key:'resetSettings',label:'Reset settings to defaults',type:'action',action:'resetSettings',danger:true}]]}
+];
+const settingsDefaults={uiLanguage:'Auto',responseLanguage:'Auto',enterToSend:true,autoScroll:true,confirmDelete:true,markdown:true,rememberLastModel:true,defaultModel:'Apex 3.1',responseLength:'Balanced',reasoning:'Standard',retryFailed:true,fallback:false,personality:'Friendly',customInstructions:'',memoryEnabled:true,saveChats:true,webSearch:true,fileUploads:true,pdfCreator:true,dataAnalysis:false,imageGeneration:false,fontSize:'Medium',chatWidth:'Comfortable',messageSpacing:'Relaxed',codeFontSize:'Medium',reducedMotion:false,sidebarDefault:'Expanded',voiceInput:true,spokenReplies:true,voiceName:'System default',speechSpeed:'Normal',voiceLanguage:'Auto'};
+let larkSettings={...settingsDefaults};try{const old=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');larkSettings={...larkSettings,...old}}catch(e){}
+let activeSettingsCategory='general';const settingsShell=$('#settingsShell'),settingsBackdrop=$('#settingsBackdrop'),settingsNav=$('#settingsNav'),settingsContent=$('#settingsContent');
+function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(larkSettings));$('#settingsStatus').textContent='All changes saved on this browser.'}catch(e){$('#settingsStatus').textContent='Could not save settings. Browser storage may be full or unavailable.';notify('Settings could not be saved')}}
+function openSettings(category='general'){settingsShell.classList.add('open');settingsBackdrop.classList.add('open');document.body.style.overflow='hidden';renderSettingsNav($('#settingsSearch').value);showSettingsCategory(category);}
+function closeSettings(){settingsShell.classList.remove('open','mobile-detail');settingsBackdrop.classList.remove('open');document.body.style.overflow='';}
+function renderSettingsNav(filter=''){settingsNav.innerHTML='';const q=filter.trim().toLowerCase();let shown=0;for(const cat of settingsDefs){const searchable=(cat.name+' '+cat.desc+' '+cat.groups.flatMap(g=>(Array.isArray(g[1])?g[1]:g.slice(1)).map(x=>x.label+' '+(x.desc||'')+' '+(x.text||'')+' '+(x.options||[]).join(' '))).join(' ')).toLowerCase();if(q&&!searchable.includes(q))continue;shown++;const b=document.createElement('button');b.className=cat.id===activeSettingsCategory?'active':'';b.innerHTML='<span>'+cat.icon+'</span><span>'+cat.name+'</span>';b.addEventListener('click',()=>showSettingsCategory(cat.id));settingsNav.appendChild(b)}if(!shown)settingsNav.innerHTML='<div class="settings-empty">No matching settings</div>'}
+function showSettingsCategory(id){const cat=settingsDefs.find(c=>c.id===id)||settingsDefs[0];activeSettingsCategory=cat.id;$('#settingsHeading').textContent=cat.name;$('#settingsSubheading').textContent=cat.desc;settingsShell.classList.toggle('mobile-detail',innerWidth<=760);renderSettingsNav($('#settingsSearch').value);settingsContent.innerHTML='';const q=$('#settingsSearch').value.trim().toLowerCase();for(const groupDef of cat.groups){const group=groupDef[0];const items=Array.isArray(groupDef[1])?groupDef[1]:groupDef.slice(1);const matches=items.filter(it=>!q||(it.label+' '+(it.desc||'')+' '+(it.text||'')+' '+(it.options||[]).join(' ')).toLowerCase().includes(q));if(!matches.length)continue;const h=document.createElement('div');h.className='settings-section-title';h.textContent=group;settingsContent.appendChild(h);for(const item of matches)settingsContent.appendChild(buildSettingRow(item))}if(!settingsContent.children.length)settingsContent.innerHTML='<div class="settings-empty">No matching settings in this category.</div>'}
+function buildSettingRow(item){const row=document.createElement('div');row.className='setting-row';const copy=document.createElement('div');copy.className='setting-copy';copy.innerHTML='<strong>'+escapeSettingsText(item.label)+'</strong>'+(item.desc?'<small>'+escapeSettingsText(item.desc)+'</small>':'');row.appendChild(copy);let control;if(item.type==='toggle'){control=document.createElement('input');control.type='checkbox';control.className='setting-control';control.checked=!!(item.key in larkSettings?larkSettings[item.key]:settingsDefaults[item.key]);control.setAttribute('aria-label',item.label);control.addEventListener('change',()=>{larkSettings[item.key]=control.checked;saveSettings();applySetting(item.key,control.checked)})}else if(item.type==='select'){control=document.createElement('select');control.className='setting-control';(item.options||[]).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;control.appendChild(o)});control.value=larkSettings[item.key]??settingsDefaults[item.key]??item.options[0];control.addEventListener('change',()=>{larkSettings[item.key]=control.value;saveSettings();applySetting(item.key,control.value)})}else if(item.type==='textarea'){control=document.createElement('textarea');control.className='setting-control textarea';control.value=larkSettings[item.key]||'';control.placeholder='Write your instructions...';control.addEventListener('input',()=>{larkSettings[item.key]=control.value;saveSettings()})}else if(item.type==='action'){control=document.createElement('button');control.className='setting-action'+(item.danger?' danger':'');control.textContent=item.action==='resetSettings'?'Reset':item.action==='clearHistory'?'Clear history':item.action==='clearMemory'?'Clear memory':item.action==='exportJson'?'Download JSON':item.action==='exportText'?'Download text':item.action==='deviceAuth'?'Check support':item.action==='diagnostics'?'Run checks':'Open';control.addEventListener('click',()=>runSettingAction(item.action))}else{control=document.createElement('div');control.className='setting-control';control.style.maxWidth='280px';control.textContent=item.text||'Not connected'}row.appendChild(control);return row}
+function escapeSettingsText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function applySetting(key,value){if(key==='defaultModel'){currentModel=value;updateModelMenu();persistState()}if(key==='memoryEnabled'){memoryEnabled=!!value;localStorage.setItem('lark_memory_enabled',String(memoryEnabled));paintToggle('memoryToggle','memorySwitch',memoryEnabled)}if(key==='webSearch'){webSearchEnabled=!!value;localStorage.setItem('lark_web_search_enabled',String(webSearchEnabled));paintToggle('webSearchToggle','webSearchSwitch',webSearchEnabled)}if(key==='enterToSend')notify(value?'Enter sends messages':'Use the send button to send messages');if(key==='saveChats')notify(value?'Chat autosave enabled':'Chat autosave disabled; existing chats remain saved');if(key==='reducedMotion')document.documentElement.style.scrollBehavior=value?'auto':'smooth';if(key==='fontSize'){messages.style.fontSize=({Small:'14px',Medium:'16px',Large:'18px'})[value]}if(key==='chatWidth'){messages.style.maxWidth=({Compact:'640px',Comfortable:'800px',Wide:'1100px'})[value];messages.style.marginInline='auto'}if(key==='sidebarDefault'){sidebar.classList.toggle('collapsed',value==='Collapsed'&&innerWidth>760)}if(key==='markdown')notify(value?'Formatted responses enabled':'Formatting preference saved')}
+function downloadSettingsFile(name,type,content){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function runSettingAction(action){if(action==='exportJson'){downloadSettingsFile('lark-chats.json','application/json',JSON.stringify(savedChats,null,2));notify('Chat export prepared')}else if(action==='exportText'){downloadSettingsFile('lark-chats.txt','text/plain',savedChats.map(c=>'# '+c.title+'\n'+(c.messages||[]).map(m=>(m.role||'')+': '+(m.content||'')).join('\n')).join('\n\n---\n\n'));notify('Text export prepared')}else if(action==='clearHistory'){if(larkSettings.confirmDelete!==false&&!confirm('Clear all saved chat history from this browser? Your settings and memory preferences will remain.'))return;savedChats=[];activeChatId=null;conversation=[];activeTitle='New chat';currentHistoryItem=null;messages.innerHTML='';messages.hidden=true;welcome.hidden=false;welcome.style.display='';renderHistory();persistState();notify('Local chat history cleared')}else if(action==='clearMemory'){if(!confirm('Clear LARK local memory preferences? Chat history will remain.'))return;larkSettings.memoryEnabled=false;localStorage.setItem('lark_memory_enabled','false');saveSettings();notify('Memory preference cleared; chat history preserved');showSettingsCategory('memory')}else if(action==='resetSettings'){if(!confirm('Reset settings to defaults? Chats and memory will be preserved.'))return;larkSettings={...settingsDefaults};saveSettings();applyAllSettings();showSettingsCategory(activeSettingsCategory);notify('Settings reset; chats and memory preserved')}else if(action==='deviceAuth'){notify('Device authentication is not configured in this single-file build. No security lock was enabled.')}else if(action==='installInfo'){notify('Use your browser menu → Add to Home screen. PWA installability depends on site configuration.')}else if(action==='diagnostics'){const checks=[['Puter.js',typeof puter!=='undefined'],['Local storage',(()=>{try{localStorage.setItem('__lark_test','1');localStorage.removeItem('__lark_test');return true}catch(e){return false}})()],['Message renderer',!!messages],['Send button',!!sendBtn]];alert('LARK diagnostics\n'+checks.map(x=>x[0]+': '+(x[1]?'Available':'Unavailable')).join('\n'))}}
+function applyAllSettings(){for(const [k,v] of Object.entries(larkSettings))applySetting(k,v)}
+$('#profileMenu').addEventListener('click',()=>openSettings());$('#settingsClose').addEventListener('click',closeSettings);$('#settingsBackdrop').addEventListener('click',closeSettings);$('#settingsBack').addEventListener('click',()=>{settingsShell.classList.remove('mobile-detail')});$('#settingsSearch').addEventListener('input',()=>{renderSettingsNav($('#settingsSearch').value);showSettingsCategory(activeSettingsCategory)});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&settingsShell.classList.contains('open'))closeSettings()});
+// Respect the selected Enter behaviour without changing Shift+Enter newline behaviour.
+promptBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&larkSettings.enterToSend===false){e.preventDefault();promptBox.value+='\n';fit()}});
+// Preserve model selection as the default for the next chat and restore persisted preferences.
+const originalNewChat=newChat;newChat=function(){originalNewChat();if(larkSettings.rememberLastModel!==false){updateModelMenu();persistState()}};
+applyAllSettings();
+
+</script>
+
+<div class="image-lightbox" id="imageLightbox" role="dialog" aria-modal="true" aria-label="Generated image preview">
+  <div class="image-lightbox-panel">
+    <div class="image-lightbox-toolbar">
+      <div class="image-lightbox-title">LARK Image Studio</div>
+      <button class="image-action" id="saveGeneratedImage" type="button" title="Save image">↓ Save</button>
+      <button class="image-action" id="editGeneratedImage" type="button" title="Edit image prompt">✎ Edit</button>
+      <button class="image-action" id="regenerateImage" type="button" title="Generate again">↻ Regenerate</button>
+      <button class="image-action" id="closeImageLightbox" type="button" aria-label="Close preview">✕</button>
+    </div>
+    <div class="image-lightbox-stage"><img id="lightboxImage" alt="Expanded AI-generated image"></div>
+    <div class="image-lightbox-note" id="imageLightboxStatus">Tap Edit to describe changes, or Regenerate to try again with the original prompt.</div>
+  </div>
+</div>
+<div class="image-edit-dialog" id="imageEditDialog" role="dialog" aria-modal="true" aria-label="Edit generated image">
+  <div class="image-edit-box"><h3>Edit this image</h3><p>Describe what you want changed. LARK will generate a new version using your edit instructions.</p><textarea id="imageEditPrompt" placeholder="e.g. Make the lighting warmer and add a mountain background"></textarea><div class="image-edit-actions"><button class="image-action" id="cancelImageEdit" type="button">Cancel</button><button class="image-action primary" id="applyImageEdit" type="button">Generate edit</button></div></div>
+</div>
+
+
+<style>
+.user-message-menu{position:fixed;z-index:99999;width:230px;padding:7px;background:#292929;color:#f5f5f5;border:1px solid #484848;border-radius:15px;box-shadow:0 14px 42px #0009;display:none;animation:msgMenuIn .12s ease-out}
+.user-message-menu.open{display:block}.user-message-menu button{width:100%;display:flex;align-items:center;gap:12px;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:inherit;text-align:left;font-size:14px}.user-message-menu button:hover,.user-message-menu button:focus{background:#404040;outline:0}.user-message-menu button svg{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8}.user-message-menu .menu-note{font-size:11px;color:#aaa;padding:7px 12px 4px}@keyframes msgMenuIn{from{opacity:0;transform:translateY(4px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:760px){.user-message-menu{width:220px}}
+</style>
+<div class="user-message-menu" id="userMessageMenu" role="menu" aria-label="Message options">
+ <button type="button" data-msg-action="copy" role="menuitem"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>Copy</button>
+ <button type="button" data-msg-action="select" role="menuitem"><svg viewBox="0 0 24 24"><path d="M5 3v18M10 3v18M15 3v18M20 3v18"/></svg>Select text</button>
+ <button type="button" data-msg-action="edit" role="menuitem"><svg viewBox="0 0 24 24"><path d="m15 5 4 4M4 20l4-.8L19.5 7.7a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>Edit message</button>
+ <button type="button" data-msg-action="share" role="menuitem"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.6 6.6-4.2m-6.6 7 6.6 4.1"/></svg>Share prompt</button>
+ <div class="menu-note">Message actions</div>
+</div>
+<script>
+(()=>{
+ const menu=document.getElementById('userMessageMenu'); let targetArticle=null, pressTimer=null, longPressed=false;
+ if(!menu)return;
+ const getText=()=>targetArticle?.querySelector('.bubble')?.innerText||'';
+ function closeMenu(){menu.classList.remove('open');menu.setAttribute('aria-hidden','true');targetArticle=null;}
+ function openMenu(article,x,y){if(!article||!article.classList.contains('user'))return;targetArticle=article;menu.classList.add('open');menu.setAttribute('aria-hidden','false');const w=230,h=menu.offsetHeight||205;menu.style.left=Math.max(8,Math.min(x,innerWidth-w-8))+'px';menu.style.top=Math.max(8,Math.min(y,innerHeight-h-8))+'px';}
+ document.addEventListener('contextmenu',e=>{const article=e.target.closest('.message.user');if(!article)return;e.preventDefault();openMenu(article,e.clientX,e.clientY);});
+ document.addEventListener('pointerdown',e=>{const article=e.target.closest('.message.user');if(!article||e.pointerType==='mouse')return;longPressed=false;clearTimeout(pressTimer);pressTimer=setTimeout(()=>{longPressed=true;openMenu(article,e.clientX||innerWidth/2,e.clientY||innerHeight/2);},560);},{passive:true});
+ ['pointerup','pointercancel','pointermove'].forEach(ev=>document.addEventListener(ev,()=>clearTimeout(pressTimer),{passive:true}));
+ document.addEventListener('click',e=>{if(!e.target.closest('#userMessageMenu'))closeMenu();});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+ menu.addEventListener('click',async e=>{const btn=e.target.closest('button[data-msg-action]');if(!btn||!targetArticle)return;const action=btn.dataset.msgAction,text=getText(),article=targetArticle;closeMenu();
+  if(action==='copy'){try{await navigator.clipboard.writeText(text);notify('Message copied')}catch{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();notify(ok?'Message copied':'Could not copy message');}}
+  else if(action==='select'){const node=article.querySelector('.bubble');if(node){const range=document.createRange();range.selectNodeContents(node);const sel=getSelection();sel.removeAllRanges();sel.addRange(range);}}
+  else if(action==='share'){try{if(navigator.share)await navigator.share({title:'LARK prompt',text});else{await navigator.clipboard.writeText(text);notify('Prompt copied — you can share it anywhere')}}catch(err){if(err.name!=='AbortError')notify('Share is unavailable; copy the prompt instead')}}
+  else if(action==='edit'){
+   const userArticles=[...document.querySelectorAll('#messages .message.user')],userOrdinal=userArticles.indexOf(article);if(userOrdinal<0)return;
+   let seen=0,convIndex=-1;for(let i=0;i<conversation.length;i++){if(conversation[i].role==='user'){if(seen===userOrdinal){convIndex=i;break;}seen++;}}
+   if(convIndex<0){notify('Could not find this prompt in the current conversation');return;}
+   promptBox.value=text;fit();promptBox.focus();
+   if(!confirm('Edit this message? Later messages in this chat will be removed when you send the edited prompt.'))return;
+   conversation=conversation.slice(0,convIndex);let node=article;while(node){const next=node.nextElementSibling;node.remove();node=next;}
+   persistState();scroll.scrollTop=scroll.scrollHeight;notify('Edit your prompt, then press Send');
+  }
+ });
+})();
+</script>
+
+
+<script>
+/* Hyper LARK interaction recovery layer.
+   Delegated capture handlers keep core controls responsive if an earlier
+   optional UI initializer fails. Each handled click is consumed exactly once. */
+(function(){
+  if(window.__larkInteractionRecoveryInstalled) return;
+  window.__larkInteractionRecoveryInstalled=true;
+  function byId(id){return document.getElementById(id)}
+  function run(fn){try{if(typeof fn==='function'){fn();return true}}catch(e){console.error('LARK interaction failed:',e);try{const t=byId('toast');if(t){t.textContent='Action failed: '+(e.message||'unknown error');t.classList.add('show')}}catch(_){} }return false}
+  function closeTransientPanels(e){
+    const target=e.target;
+    const inside=(selector)=>!!target.closest(selector);
+    const closeUnlessInside=(panelSelector,triggerSelector,closeFn)=>{
+      const panel=byId(panelSelector.replace(/^#/,''));
+      if(panel?.classList.contains('open')&&!inside(panelSelector)&&!inside(triggerSelector))closeFn(panel);
+    };
+    closeUnlessInside('#toolsMenu','#toolsBtn',p=>{p.classList.remove('open');p.setAttribute('aria-hidden','true');byId('toolsBtn')?.setAttribute('aria-expanded','false')});
+    closeUnlessInside('#addChatPanel','#attachBtn',p=>{p.classList.remove('open');p.setAttribute('aria-hidden','true');byId('attachBtn')?.setAttribute('aria-expanded','false')});
+    closeUnlessInside('#modelMenu','#modelBtn',p=>p.classList.remove('open'));
+    closeUnlessInside('#chatOptionsMenu','#chatMenuBtn',p=>p.classList.remove('open'));
+    closeUnlessInside('#userMessageMenu','.message.user',p=>{p.classList.remove('open');p.setAttribute('aria-hidden','true')});
+    // Settings and image dialogs are intentional modal surfaces; clicks inside remain untouched.
+  }
+  document.addEventListener('click',function(e){
+    closeTransientPanels(e);
+    const button=e.target.closest('button'); if(!button)return;
+    const id=button.id;
+    const actions={
+      newChatBtn:function(){if(typeof newChat==='function')newChat();},
+      sendBtn:function(){if(typeof sendMessage==='function'&&!button.disabled)sendMessage();},
+      profileMenu:function(){if(typeof openSettings==='function')openSettings();else{const shell=byId('settingsShell');if(shell){shell.classList.add('open');if(typeof showSettingsCategory==='function')showSettingsCategory('general')}}},
+      settingsClose:function(){if(typeof closeSettings==='function')closeSettings();else byId('settingsShell')?.classList.remove('open')},
+      settingsBackdrop:function(){if(typeof closeSettings==='function')closeSettings();else byId('settingsShell')?.classList.remove('open')},
+      settingsBack:function(){byId('settingsShell')?.classList.remove('mobile-detail')},
+      modelBtn:function(){const p=byId('modelMenu');if(p)p.classList.toggle('open')},
+      sidebarToggle:function(){const side=byId('sidebar'),ov=byId('overlay');if(!side)return;if(innerWidth<=760){side.classList.toggle('open');ov?.classList.toggle('show',side.classList.contains('open'))}else side.classList.toggle('collapsed')},
+      mobileMenu:function(){byId('sidebar')?.classList.add('open');byId('overlay')?.classList.add('show')},
+      attachBtn:function(){const panel=byId('addChatPanel');if(panel){const open=!panel.classList.contains('open');panel.classList.toggle('open',open);panel.setAttribute('aria-hidden',String(!open));byId('attachBtn')?.setAttribute('aria-expanded',String(open));}},
+      closeAddChat:function(){byId('addChatPanel')?.classList.remove('open')},
+      toolsBtn:function(){const menu=byId('toolsMenu');if(menu){const open=!menu.classList.contains('open');menu.classList.toggle('open',open);menu.setAttribute('aria-hidden',String(!open));byId('toolsBtn')?.setAttribute('aria-expanded',String(open));}},
+      createImageTool:function(){const menu=byId('toolsMenu'),box=byId('prompt');menu?.classList.remove('open');if(box){box.value=box.value.trim()?box.value.trim()+'\nCreate an image: ':'Create an image: ';box.dispatchEvent(new Event('input',{bubbles:true}));box.focus()}},
+      generateVideoTool:function(){const menu=byId('toolsMenu'),box=byId('prompt');menu?.classList.remove('open');if(box){box.value=box.value.trim()?box.value.trim()+'\nGenerate a video: ':'Generate a video: ';box.dispatchEvent(new Event('input',{bubbles:true}));box.focus()}},
+      searchBtn:function(){const q=prompt('Search chat titles:');if(q){const items=[...(byId('history')?.children||[])].filter(x=>x.textContent.toLowerCase().includes(q.toLowerCase()));if(typeof notify==='function')notify(items.length?'Found '+items.length+' chat(s)':'No matching chats')}},
+      libraryBtn:function(){if(typeof notify==='function')notify('LARK library is not connected yet')}
+    };
+    if(actions[id]){e.preventDefault();e.stopImmediatePropagation();run(actions[id]);return}
+    if(button.classList.contains('model-option')){e.preventDefault();e.stopImmediatePropagation();const name=button.dataset.model;if(name&&typeof updateModelMenu==='function'){currentModel=name;updateModelMenu();byId('modelMenu')?.classList.remove('open');if(typeof persistState==='function')persistState()}return}
+  },true);
+  document.addEventListener('click',function(e){closeTransientPanels(e)},false);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){const t=byId('toolsMenu'),a=byId('addChatPanel'),m=byId('modelMenu'),c=byId('chatOptionsMenu'),u=byId('userMessageMenu');[t,a,m,c,u].forEach(p=>p?.classList.remove('open'));if(t){t.setAttribute('aria-hidden','true');byId('toolsBtn')?.setAttribute('aria-expanded','false')}if(a){a.setAttribute('aria-hidden','true');byId('attachBtn')?.setAttribute('aria-expanded','false')}if(u)u.setAttribute('aria-hidden','true')}});
+  window.addEventListener('error',function(e){console.error('LARK runtime error:',e.message,e.filename,e.lineno)});
+})();
+</script>
+
+</body>
+</html>
